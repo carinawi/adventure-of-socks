@@ -3,7 +3,7 @@ import sys
 from pygame.locals import *
 
 
-GRAV = 0.005
+GRAV = 0.005 #0.005
 
 class Platform():
    def __init__(self,anchor,length,width):
@@ -16,7 +16,7 @@ class Platform():
 
 class Sock():
   
-  JUMPING_VELOCITY = 1.2
+  JUMPING_VELOCITY = 1 #1.2
   
   def __init__(self,pos,state):
       self.pos = list(pos)
@@ -29,19 +29,21 @@ class Sock():
   def update(self,dt):
     
     self.pos[1] = min(self.pos[1] - self.vel * dt,250)
-    if socke.pos[1] <= 250:
+    if not self.onboard():#socke.pos[1] <= 250:
       self.vel = self.vel - GRAV*dt
-    else:
-      self.vel = self.vel 
+    elif self.onboard() and self.vel > 0:
+      self.vel = self.vel - GRAV*dt
+    else:  
+      self.vel = 0 
     
     if self.state == 'right':
-      self.pos[0] = self.pos[0] + 6
+      self.pos[0] = self.pos[0] + 0.6
     elif self.state == 'left':
-      self.pos[0] = self.pos[0] - 6
+      self.pos[0] = self.pos[0] - 0.6
     
     
   def start_jump(self):
-    if(self.pos[1]>=250):  
+    if(self.onboard()):  
       self.vel = self.JUMPING_VELOCITY
     
   def start_move(self,direction):
@@ -50,6 +52,17 @@ class Sock():
   def stop(self):
     self.state = 'still'
 
+  def onboard(self):  
+    n = len(world)
+    for i in range(n):
+      p = world[i]
+      if self.pos[0] >= p.anchor[0] and self.pos[0] <= (p.anchor[0] + p.length):
+	if self.pos[1] <= p.anchor[1]+1 and self.pos[1] >= p.anchor[1]-1:
+	  return True
+     	  
+	  
+    return False	
+    
 pygame.init()
 DISPLAYSURF = pygame.display.set_mode((400, 300))
 pygame.display.set_caption('Hello World!')
@@ -60,17 +73,21 @@ GREEN = (  0, 255,   0)
 BLUE = (  0,   0, 255)
 #DISPLAYSURF.fill(WHITE)
 #pygame.draw.polygon(DISPLAYSURF, GREEN, ((146, 0), (291, 106), (236, 277), (56, 277), (0, 106)))
-p1 = Platform((10,20), 50, 10)
+p1 = Platform((10,200), 50, 10)
+p2 = Platform((90,150), 50, 10)
+p3 = Platform((190,100), 50, 10)
 floor = Platform((0,250),600,50)
-socke = Sock((10,240),'still')
+socke = Sock((10,250),'still')
 clock = pygame.time.Clock()
-
+world = [floor,p1,p2,p3]
 
 spamRect = pygame.Rect(10, 20, 200, 300)
 while True: # main game loop
-     clock.tick(60)
+     clock.tick(600)
      DISPLAYSURF.fill(WHITE)
      p1.draw()
+     p2.draw()
+     p3.draw()
      floor.draw()
      socke.draw()
      for event in pygame.event.get():
