@@ -3,6 +3,8 @@ import sys
 from pygame.locals import *
 
 
+GRAV = 0.005
+
 class Platform():
    def __init__(self,anchor,length,width):
      self.anchor = anchor
@@ -14,18 +16,33 @@ class Platform():
 
 class Sock():
   
+  JUMPING_VELOCITY = 1.2
+  
   def __init__(self,pos,state):
       self.pos = list(pos)
-      self.state = state  
+      self.state = state 
+      self.vel = 0
    
   def draw(self): 
-    pygame.draw.circle(DISPLAYSURF, BLUE, (self.pos[0], self.pos[1]), 20, 0)
+    pygame.draw.circle(DISPLAYSURF, BLUE, (int(round(self.pos[0])), int(round(self.pos[1]))), 20, 0)
    
-  def update(self):
+  def update(self,dt):
+    
+    self.pos[1] = min(self.pos[1] - self.vel * dt,250)
+    if socke.pos[1] <= 250:
+      self.vel = self.vel - GRAV*dt
+    else:
+      self.vel = self.vel 
+    
     if self.state == 'right':
-      self.pos[0] = self.pos[0] + 2
+      self.pos[0] = self.pos[0] + 6
     elif self.state == 'left':
-      self.pos[0] = self.pos[0] - 2
+      self.pos[0] = self.pos[0] - 6
+    
+    
+  def start_jump(self):
+    if(self.pos[1]>=250):  
+      self.vel = self.JUMPING_VELOCITY
     
   def start_move(self,direction):
     self.state = direction
@@ -65,8 +82,12 @@ while True: # main game loop
              socke.start_move('left')
            if event.key == K_RIGHT:
              socke.start_move('right')
+           if event.key == K_UP:
+	      socke.start_jump()
          elif event.type == pygame.KEYUP:
-	   socke.stop()
-	   
-     socke.update()
+	   if event.key == K_RIGHT or event.key == K_LEFT:
+	     socke.stop()
+     
+     dt = clock.get_time()	   
+     socke.update(dt)
      pygame.display.update()	
