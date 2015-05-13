@@ -61,9 +61,9 @@ class Sock():
     
     s = self.startouch()
     if(s):
-      if(s.visible):
-	self.starsnumber = self.starsnumber + 1
-      s.visible = False
+       if(s.visible):
+         self.starsnumber = self.starsnumber + 1
+         s.visible = False
       
       
       
@@ -141,9 +141,10 @@ stars = [s1,s2]
 world = [floor,p1,p2,p3,p4]
 shift = list((0,0))
 
-def texts(score, pos):
-   font=pygame.font.Font(None,30)
-   scoretext=font.render(str(score), 1,(255,255,255))
+font=pygame.font.Font(None,30)
+
+def texts(score, pos, col):
+   scoretext=font.render(str(score), 1,col)
    DISPLAYSURF.blit(scoretext, pos)
 
 
@@ -151,7 +152,7 @@ spamRect = pygame.Rect(10, 20, 200, 300)
 while True: # main game loop
      if socke.pos[1] >= 800:
        DISPLAYSURF.fill(BLACK)
-       texts('Game Over',(150,150))
+       texts('Game Over',(150,150),WHITE)
        pygame.display.update()
        for event in pygame.event.get():
            if event.type == QUIT:
@@ -164,9 +165,9 @@ while True: # main game loop
         
      else: 
        clock.tick(600)
-       DISPLAYSURF.fill(GREEN)
-       texts(socke.starsnumber,(330,5))
-       texts('Stars:',(270,5))
+       DISPLAYSURF.fill(WHITE)
+       texts(socke.starsnumber,(330,5),BLACK)
+       texts('Stars:',(270,5),BLACK)
        shift = list((-socke.pos[0]+200,-socke.pos[1]+250))
        for p in world:
          p.draw()
