@@ -112,7 +112,9 @@ while True: # main game loop
            if event.type == QUIT:
               pygame.quit()
               sys.exit()
-      
+           if event.type == pygame.KEYUP:
+	      socke = Sock((10,250),'still')
+	      
       
      else: 
        clock.tick(600)
