@@ -28,7 +28,12 @@ class Sock():
    
   def update(self,dt):
     
-    self.pos[1] = min(self.pos[1] - self.vel * dt,250)
+    p = self.overboard()
+    if p :
+      self.pos[1] = min(self.pos[1] - self.vel * dt,p.anchor[1])
+    else :
+      self.pos[1] = self.pos[1] - self.vel * dt
+    
     if not self.onboard():#socke.pos[1] <= 250:
       self.vel = self.vel - GRAV*dt
     elif self.onboard() and self.vel > 0:
@@ -63,6 +68,15 @@ class Sock():
 	  
     return False	
     
+  def overboard(self):
+    n = len(world)
+    for i in range(n):
+      p = world[i]
+      if self.pos[0] >= p.anchor[0] and self.pos[0] <= (p.anchor[0] + p.length):
+	return p
+    
+    return None
+    
 pygame.init()
 DISPLAYSURF = pygame.display.set_mode((400, 300))
 pygame.display.set_caption('Hello World!')
@@ -76,36 +90,56 @@ BLUE = (  0,   0, 255)
 p1 = Platform((10,200), 50, 10)
 p2 = Platform((90,150), 50, 10)
 p3 = Platform((190,100), 50, 10)
-floor = Platform((0,250),600,50)
+floor = Platform((-60,250),700,50)
 socke = Sock((10,250),'still')
 clock = pygame.time.Clock()
 world = [floor,p1,p2,p3]
 shift = list((0,0))
 
+def texts(score):
+   font=pygame.font.Font(None,30)
+   scoretext=font.render(str(score), 1,(255,255,255))
+   DISPLAYSURF.blit(scoretext, (150, 150))
+
+
 spamRect = pygame.Rect(10, 20, 200, 300)
 while True: # main game loop
-     clock.tick(600)
-     DISPLAYSURF.fill(WHITE)
-     shift = list((-socke.pos[0]+200,-socke.pos[1]+250))
-     for p in world:
-       p.draw()
-     socke.draw()
-     for event in pygame.event.get():
-         if event.type == QUIT:
-            pygame.quit()
-            sys.exit()
-         elif event.type == pygame.KEYDOWN:
-	   if event.key == K_LEFT:
-             socke.start_move('left')
-           if event.key == K_RIGHT:
-             socke.start_move('right')
-           if event.key == K_UP:
-	      socke.start_jump()
-         elif event.type == pygame.KEYUP:
-	   if event.key == K_RIGHT or event.key == K_LEFT:
-	     socke.stop()
+     if socke.pos[1] >= 800:
+       DISPLAYSURF.fill(BLACK)
+       texts('Game Over')
+       pygame.display.update()
+       for event in pygame.event.get():
+           if event.type == QUIT:
+              pygame.quit()
+              sys.exit()
+      
+      
+     else: 
+       clock.tick(600)
+       DISPLAYSURF.fill(WHITE)
+       shift = list((-socke.pos[0]+200,-socke.pos[1]+250))
+       for p in world:
+         p.draw()
+     
+       socke.draw()
+       for event in pygame.event.get():
+           if event.type == QUIT:
+              pygame.quit()
+              sys.exit()
+           elif event.type == pygame.KEYDOWN:
+	     if event.key == K_LEFT:
+               socke.start_move('left')
+             if event.key == K_RIGHT:
+               socke.start_move('right')
+             if event.key == K_UP:
+	        socke.start_jump()
+           elif event.type == pygame.KEYUP:
+	     if event.key == K_RIGHT or event.key == K_LEFT:
+	       socke.stop()
      
      
-     dt = clock.get_time()	   
-     socke.update(dt)
-     pygame.display.update()	
+       dt = clock.get_time()	   
+       socke.update(dt)
+       pygame.display.update()
+     
+     
