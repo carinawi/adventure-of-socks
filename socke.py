@@ -41,9 +41,9 @@ class Sock():
     else:  
       self.vel = 0 
     
-    if self.state == 'right':
+    if self.state == 'right' and not self.lefttouch():
       self.pos[0] = self.pos[0] + 0.6
-    elif self.state == 'left':
+    elif self.state == 'left'and not self.righttouch():
       self.pos[0] = self.pos[0] - 0.6
     
     
@@ -58,20 +58,34 @@ class Sock():
     self.state = 'still'
 
   def onboard(self):  
-    n = len(world)
-    for i in range(n):
-      p = world[i]
+    for p in world:
       if self.pos[0] >= p.anchor[0] and self.pos[0] <= (p.anchor[0] + p.length):
 	if self.pos[1] <= p.anchor[1]+1 and self.pos[1] >= p.anchor[1]-1:
 	  return True
      	  
 	  
     return False	
-    
+
+  def lefttouch(self):
+    for p in world:
+      if self.pos[0] <= p.anchor[0]+1 and self.pos[0] >= p.anchor[0]-1:
+	if self.pos[1] >= p.anchor[1] and self.pos[1] <= p.anchor[1]+p.width:
+	  return True
+
+    return False	
+
+  def righttouch(self):
+    for p in world:
+      if self.pos[0] <= p.anchor[0]+p.length+1 and self.pos[0] >= p.anchor[0]+p.length-1:
+	if self.pos[1] >= p.anchor[1] and self.pos[1] <= p.anchor[1]+p.width:  
+	  return True
+
+    return False    
+      
+      
+      
   def overboard(self):
-    n = len(world)
-    for i in range(n):
-      p = world[i]
+    for p in world:
       if self.pos[0] >= p.anchor[0] and self.pos[0] <= (p.anchor[0] + p.length):
 	return p
     
@@ -90,10 +104,11 @@ BLUE = (  0,   0, 255)
 p1 = Platform((10,200), 50, 10)
 p2 = Platform((90,150), 50, 10)
 p3 = Platform((190,100), 50, 10)
+p4 = Platform((230,230),50,50)
 floor = Platform((-60,250),700,50)
 socke = Sock((10,250),'still')
 clock = pygame.time.Clock()
-world = [floor,p1,p2,p3]
+world = [floor,p1,p2,p3,p4]
 shift = list((0,0))
 
 def texts(score):
