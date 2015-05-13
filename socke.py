@@ -12,7 +12,7 @@ class Platform():
      self.width  = width
 
    def draw(self):
-      pygame.draw.rect(DISPLAYSURF, RED, (self.anchor[0], self.anchor[1], self.length, self.width))
+      pygame.draw.rect(DISPLAYSURF, RED, (int(round(self.anchor[0]+shift[0])), int(round(self.anchor[1]+shift[1])), self.length, self.width))
 
 class Sock():
   
@@ -24,7 +24,7 @@ class Sock():
       self.vel = 0
    
   def draw(self): 
-    pygame.draw.circle(DISPLAYSURF, BLUE, (int(round(self.pos[0])), int(round(self.pos[1]))), 20, 0)
+    pygame.draw.circle(DISPLAYSURF, BLUE, (int(round(self.pos[0] + shift[0])), int(round(self.pos[1] + shift[1]))), 20, 0)
    
   def update(self,dt):
     
@@ -80,11 +80,13 @@ floor = Platform((0,250),600,50)
 socke = Sock((10,250),'still')
 clock = pygame.time.Clock()
 world = [floor,p1,p2,p3]
+shift = list((0,0))
 
 spamRect = pygame.Rect(10, 20, 200, 300)
 while True: # main game loop
      clock.tick(600)
      DISPLAYSURF.fill(WHITE)
+     shift = list((-socke.pos[0]+200,-socke.pos[1]+250))
      p1.draw()
      p2.draw()
      p3.draw()
@@ -104,6 +106,7 @@ while True: # main game loop
          elif event.type == pygame.KEYUP:
 	   if event.key == K_RIGHT or event.key == K_LEFT:
 	     socke.stop()
+     
      
      dt = clock.get_time()	   
      socke.update(dt)
