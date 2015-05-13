@@ -87,10 +87,8 @@ while True: # main game loop
      clock.tick(600)
      DISPLAYSURF.fill(WHITE)
      shift = list((-socke.pos[0]+200,-socke.pos[1]+250))
-     p1.draw()
-     p2.draw()
-     p3.draw()
-     floor.draw()
+     for p in world:
+       p.draw()
      socke.draw()
      for event in pygame.event.get():
          if event.type == QUIT:
