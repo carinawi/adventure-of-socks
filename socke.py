@@ -5,6 +5,17 @@ from pygame.locals import *
 
 GRAV = 0.005 #0.005
 
+class Star():
+  
+   visible = True  
+   def __init__(self,pos): 
+     self.pos = pos
+     
+   def draw(self):
+     if(self.visible):
+       pygame.draw.circle(DISPLAYSURF, BLUE, (int(round(self.pos[0] + shift[0])), int(round(self.pos[1] + shift[1]))), 8, 0)
+
+       
 class Platform():
    def __init__(self,anchor,length,width):
      self.anchor = anchor
@@ -16,7 +27,9 @@ class Platform():
 
 class Sock():
   
-  JUMPING_VELOCITY = 1 #1.2
+  JUMPING_VELOCITY = 1.1 #1.2
+  
+  starsnumber = 0
   
   def __init__(self,pos,state):
       self.pos = list(pos)
@@ -46,7 +59,14 @@ class Sock():
     elif self.state == 'left'and not self.righttouch():
       self.pos[0] = self.pos[0] - 0.6
     
-    
+    s = self.startouch()
+    if(s):
+      if(s.visible):
+	self.starsnumber = self.starsnumber + 1
+      s.visible = False
+      
+      
+      
   def start_jump(self):
     if(self.onboard()):  
       self.vel = self.JUMPING_VELOCITY
@@ -81,14 +101,21 @@ class Sock():
 	  return True
 
     return False    
-      
-      
+            
       
   def overboard(self):
     for p in world:
       if self.pos[0] >= p.anchor[0] and self.pos[0] <= (p.anchor[0] + p.length):
 	return p
     
+    return None
+    
+  def startouch(self):
+    for s in stars:
+      if abs(self.pos[0] -s.pos[0]) <= 20:
+	if abs(self.pos[1]-s.pos[1]) <= 20:  
+	  return s
+
     return None
     
 pygame.init()
@@ -108,20 +135,23 @@ p4 = Platform((230,230),50,50)
 floor = Platform((-60,250),700,50)
 socke = Sock((10,250),'still')
 clock = pygame.time.Clock()
+s1 = Star((270,70))
+s2 = Star((360,240))
+stars = [s1,s2]
 world = [floor,p1,p2,p3,p4]
 shift = list((0,0))
 
-def texts(score):
+def texts(score, pos):
    font=pygame.font.Font(None,30)
    scoretext=font.render(str(score), 1,(255,255,255))
-   DISPLAYSURF.blit(scoretext, (150, 150))
+   DISPLAYSURF.blit(scoretext, pos)
 
 
 spamRect = pygame.Rect(10, 20, 200, 300)
 while True: # main game loop
      if socke.pos[1] >= 800:
        DISPLAYSURF.fill(BLACK)
-       texts('Game Over')
+       texts('Game Over',(150,150))
        pygame.display.update()
        for event in pygame.event.get():
            if event.type == QUIT:
@@ -129,16 +159,22 @@ while True: # main game loop
               sys.exit()
            if event.type == pygame.KEYUP:
 	      socke = Sock((10,250),'still')
-	      
-      
+	      for s in stars:
+		s.visible = True
+        
      else: 
        clock.tick(600)
-       DISPLAYSURF.fill(WHITE)
+       DISPLAYSURF.fill(GREEN)
+       texts(socke.starsnumber,(330,5))
+       texts('Stars:',(270,5))
        shift = list((-socke.pos[0]+200,-socke.pos[1]+250))
        for p in world:
          p.draw()
      
+       for s in stars:
+	 s.draw()
        socke.draw()
+       
        for event in pygame.event.get():
            if event.type == QUIT:
               pygame.quit()
