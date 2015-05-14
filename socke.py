@@ -2,7 +2,6 @@ import pygame
 import sys
 from pygame.locals import *
 
-
 GRAV = 0.005 #0.005
 
 class Enemy():
@@ -50,7 +49,9 @@ class Platform():
       pygame.draw.rect(DISPLAYSURF, RED, (int(round(self.anchor[0]+shift[0])), int(round(self.anchor[1]+shift[1])), self.length, self.width))
 
 class Sock():
-  
+  img = pygame.image.load('entwurf1-klein.png')
+
+
   JUMPING_VELOCITY = 1.1 #1.2
   
   starsnumber = 0
@@ -62,11 +63,13 @@ class Sock():
       self.state = state 
       self.vel = 0
    
-  def draw(self): 
-    pygame.draw.circle(DISPLAYSURF, BLUE, (int(round(self.pos[0] + shift[0])), int(round(self.pos[1] + shift[1]))), 20, 0)
+  def draw(self):
+    x = int(round(self.pos[0] + shift[0]))
+    y = int(round(self.pos[1] + shift[1]))
+    #pygame.draw.circle(DISPLAYSURF, BLUE, (x,y), 20, 0)
+    DISPLAYSURF.blit(self.img, (x-40,y-40))
    
   def update(self,dt):
-    
     if not self.onboard():#socke.pos[1] <= 250:
       self.vel = self.vel + GRAV*dt
     elif self.onboard() and self.vel < 0:
@@ -223,13 +226,12 @@ while True: # main game loop
 		e.visible = True
               
      else: 
-       clock.tick(600)
+       clock.tick(60)
        DISPLAYSURF.fill(WHITE)
        texts(socke.starsnumber,(330,5),BLACK)
        texts('Stars:',(270,5),BLACK)
        texts(socke.hearts,(70,5),BLACK)
        texts('Hearts:',(0,5),BLACK)
-       
        shift = list((-socke.pos[0]+200,-socke.pos[1]+250))
        for p in world:
          p.draw()
