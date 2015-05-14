@@ -7,15 +7,28 @@ GRAV = 0.005 #0.005
 
 class Enemy():
    visible = True
-   def __init__(self,pos):
-     self.pos = pos
-  
+   
+   def __init__(self,pos,state):
+     self.pos = list(pos)
+     self.initialpos = pos[0]
+     self.state = state
+     
    def draw(self):
      if(self.visible):
        pygame.draw.rect(DISPLAYSURF, GREEN, (int(round(self.pos[0]+shift[0])), int(round(self.pos[1]+shift[1])), 40,40))
 
+   def update(self):
+      
+     if self.state == 1 :
+      self.pos[0] = self.pos[0] + 0.1
+     else:
+      self.pos[0] = self.pos[0] - 0.1
        
-       
+     if self.pos[0] >= self.initialpos +100:
+       self.state = 0
+     if self.pos[0] <= self.initialpos - 100:
+       self.state = 1
+      
       
 class Star():  
    visible = True  
@@ -178,7 +191,7 @@ socke = Sock((10,250),'still')
 clock = pygame.time.Clock()
 s1 = Star((270,70))
 s2 = Star((360,240))
-e1 = Enemy((390,240))
+e1 = Enemy((390,220),1)
 stars = [s1,s2]
 world = [floor,p1,p2,p3,p4]
 enemies = [e1]
@@ -246,6 +259,8 @@ while True: # main game loop
      
        dt = clock.get_time()	   
        socke.update(dt)
+       for e in enemies:
+	 e.update()
        pygame.display.update()
      
      
