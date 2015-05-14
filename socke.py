@@ -69,14 +69,14 @@ class Sock():
     
     p = self.overboard()
     if p :
-      self.pos[1] = min(self.pos[1] - self.vel * dt,p.anchor[1])
+      self.pos[1] = min(self.pos[1] + self.vel * dt,p.anchor[1])
     else :
-      self.pos[1] = self.pos[1] - self.vel * dt
+      self.pos[1] = self.pos[1] + self.vel * dt
     
     if not self.onboard():#socke.pos[1] <= 250:
-      self.vel = self.vel - GRAV*dt
-    elif self.onboard() and self.vel > 0:
-      self.vel = self.vel - GRAV*dt
+      self.vel = self.vel + GRAV*dt
+    elif self.onboard() and self.vel < 0:
+      self.vel = self.vel + GRAV*dt
     else:  
       self.vel = 0 
     
@@ -102,7 +102,7 @@ class Sock():
     
   def start_jump(self):
     if(self.onboard()):  
-      self.vel = self.JUMPING_VELOCITY
+      self.vel = -self.JUMPING_VELOCITY
     
   def start_move(self,direction):
     self.state = direction
