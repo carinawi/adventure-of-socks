@@ -258,10 +258,12 @@ while True: # main game loop
 	       socke.stop()
      
      
-       dt = clock.get_time()
-       socke.update(dt)
-       for e in enemies:
-	 e.update(dt)
+       dt = float(clock.get_time())
+       number_of_nano_steps = 10
+       for i in range(number_of_nano_steps):
+	 socke.update(dt/number_of_nano_steps)
+	 for e in enemies:
+	   e.update(dt/number_of_nano_steps)
        pygame.display.update()
      
      
