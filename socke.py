@@ -67,18 +67,18 @@ class Sock():
    
   def update(self,dt):
     
-    p = self.overboard()
-    if p :
-      self.pos[1] = min(self.pos[1] + self.vel * dt,p.anchor[1])
-    else :
-      self.pos[1] = self.pos[1] + self.vel * dt
-    
     if not self.onboard():#socke.pos[1] <= 250:
       self.vel = self.vel + GRAV*dt
     elif self.onboard() and self.vel < 0:
       self.vel = self.vel + GRAV*dt
     else:  
       self.vel = 0 
+    
+    p = self.overboard()
+    if p :
+      self.pos[1] = min(self.pos[1] + self.vel * dt,p.anchor[1])
+    else :
+      self.pos[1] = self.pos[1] + self.vel * dt
     
     if self.state == 'right' and not self.lefttouch():
       self.pos[0] = self.pos[0] + 0.6*dt
