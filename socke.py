@@ -17,12 +17,12 @@ class Enemy():
      if(self.visible):
        pygame.draw.rect(DISPLAYSURF, GREEN, (int(round(self.pos[0]+shift[0])), int(round(self.pos[1]+shift[1])), 40,40))
 
-   def update(self):
+   def update(self, dt):
       
      if self.state == 1 :
-      self.pos[0] = self.pos[0] + 0.1
+      self.pos[0] = self.pos[0] + 0.05*dt
      else:
-      self.pos[0] = self.pos[0] - 0.1
+      self.pos[0] = self.pos[0] - 0.05*dt
        
      if self.pos[0] >= self.initialpos +100:
        self.state = 0
@@ -81,9 +81,9 @@ class Sock():
       self.vel = 0 
     
     if self.state == 'right' and not self.lefttouch():
-      self.pos[0] = self.pos[0] + 0.6
+      self.pos[0] = self.pos[0] + 0.6*dt
     elif self.state == 'left'and not self.righttouch():
-      self.pos[0] = self.pos[0] - 0.6
+      self.pos[0] = self.pos[0] - 0.6*dt
     
     s = self.startouch()
     if(s):
@@ -257,10 +257,10 @@ while True: # main game loop
 	       socke.stop()
      
      
-       dt = clock.get_time()	   
+       dt = clock.get_time()
        socke.update(dt)
        for e in enemies:
-	 e.update()
+	 e.update(dt)
        pygame.display.update()
      
      
