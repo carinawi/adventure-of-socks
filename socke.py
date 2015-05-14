@@ -74,7 +74,7 @@ class Sock():
     else:  
       self.vel = 0 
     
-    p = self.overboard()
+    p = self.overboard(dt)
     if p :
       self.pos[1] = min(self.pos[1] + self.vel * dt,p.anchor[1])
     else :
@@ -136,9 +136,10 @@ class Sock():
     return False    
             
       
-  def overboard(self):
+  def overboard(self,dt):
+    proposedY = self.pos[1] + self.vel * dt
     for p in world:
-      if self.pos[0] >= p.anchor[0] and self.pos[0] <= (p.anchor[0] + p.length):
+      if self.pos[0] >= p.anchor[0] and self.pos[0] <= p.anchor[0] + p.length and self.pos[1] - p.anchor[1] <= 3 and proposedY - p.anchor[1] >= -3:
 	return p
     
     return None
