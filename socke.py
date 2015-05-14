@@ -5,8 +5,19 @@ from pygame.locals import *
 
 GRAV = 0.005 #0.005
 
-class Star():
+class Enemy():
+   visible = True
+   def __init__(self,pos):
+     self.pos = pos
   
+   def draw(self):
+     if(self.visible):
+       pygame.draw.rect(DISPLAYSURF, GREEN, (int(round(self.pos[0]+shift[0])), int(round(self.pos[1]+shift[1])), 40,40))
+
+       
+       
+      
+class Star():  
    visible = True  
    def __init__(self,pos): 
      self.pos = pos
@@ -30,6 +41,8 @@ class Sock():
   JUMPING_VELOCITY = 1.1 #1.2
   
   starsnumber = 0
+  
+  hearts = 3
   
   def __init__(self,pos,state):
       self.pos = list(pos)
@@ -64,9 +77,16 @@ class Sock():
        if(s.visible):
          self.starsnumber = self.starsnumber + 1
          s.visible = False
+    
+    e = self.enemybeat()  
+    if(e):
+        e.visible = False
       
-      
-      
+    if(self.enemytouch()):
+      self.hearts = self.hearts - 1
+      self.pos[0] = self.pos[0] - 90
+    
+    
   def start_jump(self):
     if(self.onboard()):  
       self.vel = self.JUMPING_VELOCITY
@@ -117,6 +137,27 @@ class Sock():
 	  return s
 
     return None
+   
+  def enemytouch(self):
+    for e in enemies:
+      if e.visible == True:  
+        if self.pos[0] <= e.pos[0]+40+1 and self.pos[0] >= e.pos[0]+40-1:
+	  if self.pos[1] >= e.pos[1] and self.pos[1] <= e.pos[1]+40:  
+	    return True
+        if self.pos[0] <= e.pos[0]+1 and self.pos[0] >= e.pos[0]-1:
+	  if self.pos[1] >= e.pos[1] and self.pos[1] <= e.pos[1]+40:
+	    return True 
+    return False  
+
+  def enemybeat(self):  
+    for e in enemies:
+      if self.pos[0] >= e.pos[0] and self.pos[0] <= (e.pos[0] + 40):
+	if self.pos[1] <= e.pos[1]+1 and self.pos[1] >= e.pos[1]-1:
+	  return e
+     	  
+	  
+    return None
+    
     
 pygame.init()
 DISPLAYSURF = pygame.display.set_mode((400, 300))
@@ -132,13 +173,15 @@ p1 = Platform((10,200), 50, 10)
 p2 = Platform((90,150), 50, 10)
 p3 = Platform((190,100), 50, 10)
 p4 = Platform((230,230),50,50)
-floor = Platform((-60,250),700,50)
+floor = Platform((-60,250),900,50)
 socke = Sock((10,250),'still')
 clock = pygame.time.Clock()
 s1 = Star((270,70))
 s2 = Star((360,240))
+e1 = Enemy((390,240))
 stars = [s1,s2]
 world = [floor,p1,p2,p3,p4]
+enemies = [e1]
 shift = list((0,0))
 
 font=pygame.font.Font(None,30)
@@ -150,7 +193,7 @@ def texts(score, pos, col):
 
 spamRect = pygame.Rect(10, 20, 200, 300)
 while True: # main game loop
-     if socke.pos[1] >= 800:
+     if socke.pos[1] >= 800 or socke.hearts == 0:
        DISPLAYSURF.fill(BLACK)
        texts('Game Over',(150,150),WHITE)
        pygame.display.update()
@@ -162,20 +205,29 @@ while True: # main game loop
 	      socke = Sock((10,250),'still')
 	      for s in stars:
 		s.visible = True
-        
+              for e in enemies:
+		e.visible = True
+              
      else: 
        clock.tick(600)
        DISPLAYSURF.fill(WHITE)
        texts(socke.starsnumber,(330,5),BLACK)
        texts('Stars:',(270,5),BLACK)
+       texts(socke.hearts,(70,5),BLACK)
+       texts('Hearts:',(0,5),BLACK)
+       
        shift = list((-socke.pos[0]+200,-socke.pos[1]+250))
        for p in world:
          p.draw()
      
        for s in stars:
 	 s.draw()
-       socke.draw()
        
+       for e in enemies:
+	 e.draw()
+      
+       socke.draw()
+      
        for event in pygame.event.get():
            if event.type == QUIT:
               pygame.quit()
