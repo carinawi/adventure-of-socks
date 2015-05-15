@@ -3,6 +3,7 @@ import sys
 from pygame.locals import *
 
 GRAV = 0.005 #0.005
+FPS  = 60
 
 class Enemy():
    visible = True
@@ -48,10 +49,27 @@ class Platform():
    def draw(self):
       pygame.draw.rect(DISPLAYSURF, RED, (int(round(self.anchor[0]+shift[0])), int(round(self.anchor[1]+shift[1])), self.length, self.width))
 
+class AnimatedSprite():
+  def __init__(self, delay, images):
+    # delay in ms
+    self.images = images
+    self.delay  = delay * FPS / 1000 # dieses delay in Anzahl Frames
+    print self.delay
+    self.ticks  = 0
+    
+  def draw(self,pos):
+    DISPLAYSURF.blit(self.images[(self.ticks / self.delay) % len(self.images)], pos)
+    self.ticks = self.ticks + 1
+      
+      
 class Sock():
-  img = pygame.image.load('entwurf1-klein.png')
+  sprite_walk_right = AnimatedSprite(50, [ pygame.image.load("laufanimation/%02d.png" % i) for i in range(13) ])
+  sprite_walk_left  = AnimatedSprite(50, [ pygame.transform.flip(pygame.image.load("laufanimation/%02d.png" % i),True,False) for i in range(13) ])
+  sprite_still      = AnimatedSprite(50, [ pygame.image.load("still.png") ])
+  sprite_jump_right = AnimatedSprite(50, [ pygame.image.load("jump.png")  ])
+  sprite_jump_left  = AnimatedSprite(50, [ pygame.transform.flip(pygame.image.load("jump.png"),True,False) ])
 
-
+  
   JUMPING_VELOCITY = 1.1 #1.2
   
   starsnumber = 0
@@ -64,10 +82,21 @@ class Sock():
       self.vel = 0
    
   def draw(self):
-    x = int(round(self.pos[0] + shift[0]))
-    y = int(round(self.pos[1] + shift[1]))
+    x = int(round(self.pos[0] + shift[0])) - 40
+    y = int(round(self.pos[1] + shift[1])) - 40
     #pygame.draw.circle(DISPLAYSURF, BLUE, (x,y), 20, 0)
-    DISPLAYSURF.blit(self.img, (x-40,y-40))
+    if self.vel != 0:
+      if self.state == 'left':
+	self.sprite_jump_left.draw((x,y))
+      else:
+	self.sprite_jump_right.draw((x,y))
+    else:
+      if self.state == 'right':
+	self.sprite_walk_right.draw((x,y))
+      elif self.state == 'left':
+	self.sprite_walk_left.draw((x,y))
+      else:
+	self.sprite_still.draw((x,y))
    
   def update(self,dt):
     if not self.onboard():#socke.pos[1] <= 250:
@@ -226,7 +255,7 @@ while True: # main game loop
 		e.visible = True
               
      else: 
-       clock.tick(60)
+       clock.tick(FPS)
        DISPLAYSURF.fill(WHITE)
        texts(socke.starsnumber,(330,5),BLACK)
        texts('Stars:',(270,5),BLACK)
