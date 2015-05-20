@@ -75,6 +75,9 @@ class Sock():
   starsnumber = 0
   
   hearts = 3
+  length = 40
+  height = 40
+  standing_factor = 0.6
   
   def __init__(self,pos,state):
       self.pos = list(pos)
@@ -82,9 +85,12 @@ class Sock():
       self.vel = 0
    
   def draw(self):
-    x = int(round(self.pos[0] + shift[0])) - 40
-    y = int(round(self.pos[1] + shift[1])) - 40
-    #pygame.draw.circle(DISPLAYSURF, BLUE, (x,y), 20, 0)
+    x = int(round(self.pos[0] + shift[0])) #-  self.length
+    y = int(round(self.pos[1] + shift[1])) -  self.height
+    pygame.draw.rect(DISPLAYSURF, BLUE, (x, y, self.length, self.height))
+    x = x - float(self.length*0.5)
+    y = y - float((self.height)*0.6)
+    
     if self.vel != 0:
       if self.state == 'left':
 	self.sprite_jump_left.draw((x,y))
@@ -127,11 +133,14 @@ class Sock():
     if(e):
         e.visible = False
       
+    #dringend nachbessern!!!!! unverwundbarkeit etc.  
     if(self.enemytouch()):
       self.hearts = self.hearts - 1
-      self.pos[0] = self.pos[0] - 90
-    
-    
+      if(self.state == 'right' or self.state == 'still'):
+        self.pos[0] = self.pos[0] - 90
+      if(self.state == 'left'):
+        self.pos[0] = self.pos[0] + 90
+        
   def start_jump(self):
     if(self.onboard()):  
       self.vel = -self.JUMPING_VELOCITY
@@ -142,19 +151,22 @@ class Sock():
   def stop(self):
     self.state = 'still'
 
+    
+  #Minimal berstehen darf die Socke bei ner Platform  
   def onboard(self):  
     for p in world:
-      if self.pos[0] >= p.anchor[0] and self.pos[0] <= (p.anchor[0] + p.length):
+      if self.pos[0] + self.standing_factor * self.length >= p.anchor[0] and self.pos[0] + self.length - self.standing_factor * self.length <= p.anchor[0] + p.length:
 	if self.pos[1] <= p.anchor[1]+1 and self.pos[1] >= p.anchor[1]-1:
 	  return True
      	  
 	  
     return False	
 
+    
   def lefttouch(self):
     for p in world:
-      if self.pos[0] <= p.anchor[0]+1 and self.pos[0] >= p.anchor[0]-1:
-	if self.pos[1] >= p.anchor[1] and self.pos[1] <= p.anchor[1]+p.width:
+      if self.pos[0]+self.length <= p.anchor[0]+1 and self.pos[0]+self.length >= p.anchor[0]-1:
+	if self.pos[1]-self.height >= p.anchor[1]-(self.height-5) and self.pos[1]<= p.anchor[1]+p.width+(self.height-5):
 	  return True
 
     return False	
@@ -162,7 +174,7 @@ class Sock():
   def righttouch(self):
     for p in world:
       if self.pos[0] <= p.anchor[0]+p.length+1 and self.pos[0] >= p.anchor[0]+p.length-1:
-	if self.pos[1] >= p.anchor[1] and self.pos[1] <= p.anchor[1]+p.width:  
+	if self.pos[1]-self.height >= p.anchor[1]-(self.height-5) and self.pos[1]<= p.anchor[1]+p.width+(self.height-5): 
 	  return True
 
     return False    
@@ -171,33 +183,35 @@ class Sock():
   def overboard(self,dt):
     proposedY = self.pos[1] + self.vel * dt
     for p in world:
-      if self.pos[0] >= p.anchor[0] and self.pos[0] <= p.anchor[0] + p.length and self.pos[1] - p.anchor[1] <= 3 and proposedY - p.anchor[1] >= -3:
+      if (self.pos[0]) + self.standing_factor*self.length >= p.anchor[0] and (self.pos[0]+self.length)-self.standing_factor*self.length <= p.anchor[0] + p.length and self.pos[1] - p.anchor[1] <= 3 and proposedY - p.anchor[1] >= -3:
 	return p
     
     return None
     
+  #20  hier der Kreisdurchmesser der Stars sein...  
   def startouch(self):
     for s in stars:
-      if abs(self.pos[0] -s.pos[0]) <= 20:
-	if abs(self.pos[1]-s.pos[1]) <= 20:  
+      if abs(self.pos[0] -s.pos[0]) <= 8 or abs(self.pos[0] + self.length - s.pos[0]) <= 8:
+	if self.pos[1] <= s.pos[1]+2+self.height and (self.pos[1]-self.height) >= s.pos[1]-2-self.height:  
 	  return s
 
     return None
    
+  #40 ist gegnergre, muss man in ein paar variablen verpacken... 
   def enemytouch(self):
     for e in enemies:
       if e.visible == True:  
         if self.pos[0] <= e.pos[0]+40+1 and self.pos[0] >= e.pos[0]+40-1:
-	  if self.pos[1] >= e.pos[1] and self.pos[1] <= e.pos[1]+40:  
+	  if self.pos[1]-self.height >= e.pos[1]-(self.height-10) and self.pos[1]<= e.pos[1]+40+(self.height-10): 
 	    return True
-        if self.pos[0] <= e.pos[0]+1 and self.pos[0] >= e.pos[0]-1:
-	  if self.pos[1] >= e.pos[1] and self.pos[1] <= e.pos[1]+40:
+        if self.pos[0]+self.length <= e.pos[0]+1 and self.pos[0]+self.length >= e.pos[0]-1:
+	  if self.pos[1]-self.height >= e.pos[1]-(self.height-10) and self.pos[1]<= e.pos[1]+40+(self.height-10):
 	    return True 
     return False  
 
   def enemybeat(self):  
     for e in enemies:
-      if self.pos[0] >= e.pos[0] and self.pos[0] <= (e.pos[0] + 40):
+      if (self.pos[0])+self.standing_factor*self.length >= e.pos[0] and (self.pos[0]+self.length)-self.standing_factor*self.length <= (e.pos[0] + 40):
 	if self.pos[1] <= e.pos[1]+1 and self.pos[1] >= e.pos[1]-1:
 	  return e
      	  
@@ -220,7 +234,7 @@ p2 = Platform((90,150), 50, 10)
 p3 = Platform((190,100), 50, 10)
 p4 = Platform((230,230),50,50)
 floor = Platform((-60,250),900,50)
-socke = Sock((10,250),'still')
+socke = Sock((-60,250),'still')
 clock = pygame.time.Clock()
 s1 = Star((270,70))
 s2 = Star((360,240))
@@ -239,7 +253,7 @@ def texts(score, pos, col):
 
 spamRect = pygame.Rect(10, 20, 200, 300)
 while True: # main game loop
-     if socke.pos[1] >= 800 or socke.hearts == 0:
+     if socke.pos[1] >= 800 or socke.hearts <= 0:
        DISPLAYSURF.fill(BLACK)
        texts('Game Over',(150,150),WHITE)
        pygame.display.update()
