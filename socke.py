@@ -79,8 +79,9 @@ class Sock():
   length = 45
   height = 45
   standing_factor = 0.6
+  enemy_standing_factor = 0.9
   xvel = 0.6
-  Right = True
+  Right = True # What was the last position Socke got?
   
   def __init__(self,pos,state):
       self.pos = list(pos)
@@ -216,7 +217,7 @@ class Sock():
 
   def enemybeat(self):  
     for e in enemies:
-      if (self.pos[0])+self.standing_factor*self.length >= e.pos[0] and (self.pos[0]+self.length)-self.standing_factor*self.length <= (e.pos[0] + 40):
+      if (self.pos[0])+self.enemy_standing_factor*self.length >= e.pos[0] and (self.pos[0]+self.length)-self.enemy_standing_factor*self.length <= (e.pos[0] + 40):
 	if self.pos[1] <= e.pos[1]+1 and self.pos[1] >= e.pos[1]-1:
 	  return e
      	  
