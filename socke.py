@@ -66,6 +66,7 @@ class Sock():
   sprite_walk_right = AnimatedSprite(50, [ pygame.image.load("laufanimation/%02d.png" % i) for i in range(13) ])
   sprite_walk_left  = AnimatedSprite(50, [ pygame.transform.flip(pygame.image.load("laufanimation/%02d.png" % i),True,False) for i in range(13) ])
   sprite_still      = AnimatedSprite(50, [ pygame.image.load("still.png") ])
+  sprite_still_left = AnimatedSprite(50, [ pygame.transform.flip(pygame.image.load("still.png"),True,False) ])
   sprite_jump_right = AnimatedSprite(50, [ pygame.image.load("jump.png")  ])
   sprite_jump_left  = AnimatedSprite(50, [ pygame.transform.flip(pygame.image.load("jump.png"),True,False) ])
 
@@ -75,9 +76,11 @@ class Sock():
   starsnumber = 0
   
   hearts = 3
-  length = 40
-  height = 40
+  length = 45
+  height = 45
   standing_factor = 0.6
+  xvel = 0.6
+  Right = True
   
   def __init__(self,pos,state):
       self.pos = list(pos)
@@ -87,23 +90,25 @@ class Sock():
   def draw(self):
     x = int(round(self.pos[0] + shift[0])) #-  self.length
     y = int(round(self.pos[1] + shift[1])) -  self.height
-    pygame.draw.rect(DISPLAYSURF, BLUE, (x, y, self.length, self.height))
-    x = x - float(self.length*0.5)
-    y = y - float((self.height)*0.6)
+    #pygame.draw.rect(DISPLAYSURF, BLUE, (x, y, self.length, self.height))
+    x = x - float(self.length*0.4)
+    y = y - float((self.height)*0.4)
     
     if self.vel != 0:
-      if self.state == 'left':
+      if self.Right == False:#self.state == 'left':
 	self.sprite_jump_left.draw((x,y))
       else:
 	self.sprite_jump_right.draw((x,y))
     else:
-      if self.state == 'right':
+      if self.Right == True and self.state == 'right':
 	self.sprite_walk_right.draw((x,y))
-      elif self.state == 'left':
+      elif self.Right == False and self.state == 'left':
 	self.sprite_walk_left.draw((x,y))
-      else:
+      elif self.Right == True:
 	self.sprite_still.draw((x,y))
-   
+      elif self.Right == False:
+	self.sprite_still_left.draw((x,y))
+      
   def update(self,dt):
     if not self.onboard():#socke.pos[1] <= 250:
       self.vel = self.vel + GRAV*dt
@@ -119,9 +124,9 @@ class Sock():
       self.pos[1] = self.pos[1] + self.vel * dt
     
     if self.state == 'right' and not self.lefttouch():
-      self.pos[0] = self.pos[0] + 0.6*dt
+      self.pos[0] = self.pos[0] + self.xvel*dt
     elif self.state == 'left'and not self.righttouch():
-      self.pos[0] = self.pos[0] - 0.6*dt
+      self.pos[0] = self.pos[0] - self.xvel*dt
     
     s = self.startouch()
     if(s):
@@ -229,10 +234,10 @@ GREEN = (  0, 255,   0)
 BLUE = (  0,   0, 255)
 #DISPLAYSURF.fill(WHITE)
 #pygame.draw.polygon(DISPLAYSURF, GREEN, ((146, 0), (291, 106), (236, 277), (56, 277), (0, 106)))
-p1 = Platform((10,200), 50, 10)
-p2 = Platform((90,150), 50, 10)
-p3 = Platform((190,100), 50, 10)
-p4 = Platform((230,230),50,50)
+p1 = Platform((10,190), 50, 10)
+p2 = Platform((90,140), 50, 10)
+p3 = Platform((190,90), 50, 10)
+p4 = Platform((230,220),50,50)
 floor = Platform((-60,250),900,50)
 socke = Sock((-60,250),'still')
 clock = pygame.time.Clock()
@@ -294,8 +299,10 @@ while True: # main game loop
            elif event.type == pygame.KEYDOWN:
 	     if event.key == K_LEFT:
                socke.start_move('left')
+               socke.Right = False
              if event.key == K_RIGHT:
                socke.start_move('right')
+               socke.Right = True
              if event.key == K_UP:
 	        socke.start_jump()
            elif event.type == pygame.KEYUP:
