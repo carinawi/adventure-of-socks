@@ -7,6 +7,7 @@ FPS  = 60
 
 class Enemy():
    visible = True
+   enemysize = 40
    
    def __init__(self,pos,state):
      self.pos = list(pos)
@@ -15,7 +16,7 @@ class Enemy():
      
    def draw(self):
      if(self.visible):
-       pygame.draw.rect(DISPLAYSURF, GREEN, (int(round(self.pos[0]+shift[0])), int(round(self.pos[1]+shift[1])), 40,40))
+       pygame.draw.rect(DISPLAYSURF, GREEN, (int(round(self.pos[0]+shift[0])), int(round(self.pos[1]+shift[1])), self.enemysize,self.enemysize))
 
    def update(self, dt):
       
@@ -32,6 +33,7 @@ class Enemy():
       
 class Star():  
    visible = True  
+   diameter = 8
    def __init__(self,pos): 
      self.pos = pos
      
@@ -78,10 +80,10 @@ class Sock():
   hearts = 3
   length = 45
   height = 45
-  standing_factor = 0.6
+  standing_factor = 0.8
   enemy_standing_factor = 0.9
   xvel = 0.6
-  Right = True # What was the last position Socke got?
+  Right = True # What was the last position Socke got? Right is default...
   
   def __init__(self,pos,state):
       self.pos = list(pos)
@@ -193,31 +195,30 @@ class Sock():
 	return p
     
     return None
-    
-  #20  hier der Kreisdurchmesser der Stars sein...  
+   
+   #something is strange here..
   def startouch(self):
     for s in stars:
-      if abs(self.pos[0] -s.pos[0]) <= 8 or abs(self.pos[0] + self.length - s.pos[0]) <= 8:
-	if self.pos[1] <= s.pos[1]+2+self.height and (self.pos[1]-self.height) >= s.pos[1]-2-self.height:  
+      if abs(self.pos[0] -s.pos[0]) <= s.diameter or abs(self.pos[0] + self.length - s.pos[0]) <= s.diameter:
+	if self.pos[1] <= s.pos[1]+6+self.height and (self.pos[1]-self.height) >= s.pos[1]-6-self.height:  
 	  return s
 
     return None
    
-  #40 ist gegnergre, muss man in ein paar variablen verpacken... 
   def enemytouch(self):
     for e in enemies:
       if e.visible == True:  
-        if self.pos[0] <= e.pos[0]+40+1 and self.pos[0] >= e.pos[0]+40-1:
-	  if self.pos[1]-self.height >= e.pos[1]-(self.height-10) and self.pos[1]<= e.pos[1]+40+(self.height-10): 
+        if self.pos[0] <= e.pos[0]+e.enemysize+1 and self.pos[0] >= e.pos[0]+e.enemysize-1:
+	  if self.pos[1]-self.height >= e.pos[1]-(self.height-10) and self.pos[1]<= e.pos[1]+e.enemysize+(self.height-10): 
 	    return True
         if self.pos[0]+self.length <= e.pos[0]+1 and self.pos[0]+self.length >= e.pos[0]-1:
-	  if self.pos[1]-self.height >= e.pos[1]-(self.height-10) and self.pos[1]<= e.pos[1]+40+(self.height-10):
+	  if self.pos[1]-self.height >= e.pos[1]-(self.height-10) and self.pos[1]<= e.pos[1]+e.enemysize+(self.height-10):
 	    return True 
     return False  
 
   def enemybeat(self):  
     for e in enemies:
-      if (self.pos[0])+self.enemy_standing_factor*self.length >= e.pos[0] and (self.pos[0]+self.length)-self.enemy_standing_factor*self.length <= (e.pos[0] + 40):
+      if (self.pos[0])+self.enemy_standing_factor*self.length >= e.pos[0] and (self.pos[0]+self.length)-self.enemy_standing_factor*self.length <= (e.pos[0] + e.enemysize):
 	if self.pos[1] <= e.pos[1]+1 and self.pos[1] >= e.pos[1]-1:
 	  return e
      	  
