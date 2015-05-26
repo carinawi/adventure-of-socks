@@ -114,15 +114,19 @@ class Sock():
       else:
 	self.sprite_jump_right.draw((x,y))
     else:
-      if self.Right == True and self.state == 'right':
+      if self.Right == True and not self.is_still():
 	self.sprite_walk_right.draw((x,y))
-      elif self.Right == False and self.state == 'left':
+      elif self.Right == False and not self.is_still():
 	self.sprite_walk_left.draw((x,y))
       elif self.Right == True:
 	self.sprite_still.draw((x,y))
       elif self.Right == False:
 	self.sprite_still_left.draw((x,y))
-      
+
+  def is_still(self):
+    return self.vel[0] == 0
+    # XXX: hier später mit Geschwindigkeit der Plattform, auf der man vielleicht steht, vergleichen.
+	
   def update(self,dt):
     if not self.onboard():#socke.pos[1] <= 250:
       self.vel[1] = self.vel[1] + GRAV*dt
@@ -137,7 +141,7 @@ class Sock():
     else :
       self.pos[1] = self.pos[1] + self.vel[1] * dt
     
-    if (self.state == 'right' and not self.lefttouch()) or (self.state == 'left' and not self.righttouch()):
+    if (self.vel[0] > 0 and not self.lefttouch()) or (self.vel[0] < 0 and not self.righttouch()):
       self.pos[0] = self.pos[0] + self.vel[0]*dt
 
     s = self.startouch()
@@ -171,7 +175,7 @@ class Sock():
      
   def stop(self):
     self.state = 'still'
-    #self.vel[0] = 0
+    self.vel[0] = 0
   
   #Minimal berstehen darf die Socke bei ner Platform  
   def onboard(self):  
