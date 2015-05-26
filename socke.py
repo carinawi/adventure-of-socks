@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import pygame
 import sys
 from pygame.locals import *
@@ -44,7 +45,7 @@ class Star():
 
        
 class Platform():
-   vel = [0,0]
+   vel = (0,0)
    
    def __init__(self,anchor,length,width):
      self.anchor = anchor
@@ -54,8 +55,8 @@ class Platform():
    def draw(self):
       pygame.draw.rect(DISPLAYSURF, RED, (int(round(self.anchor[0]+shift[0])), int(round(self.anchor[1]+shift[1])), self.length, self.width))
 
-   def update(self):
-      pass 
+   def update(self, dt):
+      self.anchor = (self.anchor[0] + dt*self.vel[0], self.anchor[1] + dt*self.vel[1])
       
 
       
@@ -100,7 +101,9 @@ class Sock():
       self.pos = list(pos)
       self.state = state 
       self.vel = [0,0]
-   
+      
+      self.last_standed_platform = None
+
   def draw(self):
     x = int(round(self.pos[0] + shift[0])) #-  self.length
     y = int(round(self.pos[1] + shift[1])) -  self.height
@@ -123,9 +126,16 @@ class Sock():
       elif self.Right == False:
 	self.sprite_still_left.draw((x,y))
 
+  # Geschwindigkeit, die Socke ohne eigene Bewegung hat (zum Beispiel durch bewegende Plattform)
+  def basevel(self):
+    p = self.onboard()
+    if p:
+      return (p.vel[0], 0)   # XXX: sollte auch y-Geschwindigkeit mitnehmen
+    else:
+      return (0,0)
+	
   def is_still(self):
-    return self.vel[0] == 0
-    # XXX: hier später mit Geschwindigkeit der Plattform, auf der man vielleicht steht, vergleichen.
+    return self.vel[0] == self.basevel()[0]
 	
   def update(self,dt):
     if not self.onboard():#socke.pos[1] <= 250:
@@ -136,11 +146,17 @@ class Sock():
       self.vel[1] = 0 
     
     p = self.overboard(dt)
-    if p :
+    if p:
       self.pos[1] = min(self.pos[1] + self.vel[1] * dt,p.anchor[1])
     else :
       self.pos[1] = self.pos[1] + self.vel[1] * dt
-    
+
+    p = self.onboard()
+    if self.last_standed_platform != p:
+	self.stop()
+    self.last_standed_platform = p
+      
+      
     if (self.vel[0] > 0 and not self.lefttouch()) or (self.vel[0] < 0 and not self.righttouch()):
       self.pos[0] = self.pos[0] + self.vel[0]*dt
 
@@ -163,29 +179,28 @@ class Sock():
         self.pos[0] = self.pos[0] + 90
         
   def start_jump(self):
-    if(self.onboard()):  
+    if self.onboard():
       self.vel[1] = -self.JUMPING_VELOCITY
     
   def start_move(self,direction):
     self.state = direction
     if direction == 'left':
-      self.vel[0] = -self.RUNNING_VELOCITY
+      self.vel[0] = self.basevel()[0] -self.RUNNING_VELOCITY
     elif direction == 'right':
-      self.vel[0] = self.RUNNING_VELOCITY
+      self.vel[0] = self.basevel()[0] + self.RUNNING_VELOCITY
      
   def stop(self):
     self.state = 'still'
-    self.vel[0] = 0
+    self.vel[0] = self.basevel()[0]
   
-  #Minimal berstehen darf die Socke bei ner Platform  
+  # Steht Socke momentan auf einer Plattform? (Minimales überstehen ist okay.)
   def onboard(self):  
     for p in world:
       if self.pos[0] + self.standing_factor * self.length >= p.anchor[0] and self.pos[0] + self.length - self.standing_factor * self.length <= p.anchor[0] + p.length:
 	if self.pos[1] <= p.anchor[1]+1 and self.pos[1] >= p.anchor[1]-1:
-	  return True
-     	  
-	  
-    return False	
+	  return p
+
+    return None	
 
     
   def lefttouch(self):
@@ -204,7 +219,7 @@ class Sock():
 
     return False    
             
-      
+  # Flog Socke während des Zeitschritts durch eine Plattform? 
   def overboard(self,dt):
     proposedY = self.pos[1] + self.vel[1] * dt
     for p in world:
@@ -257,6 +272,7 @@ p1 = Platform((10,190), 50, 10)
 p2 = Platform((90,140), 50, 10)
 p3 = Platform((190,90), 50, 10)
 p4 = Platform((230,220),50,50)
+p4.vel = (0.01, 0)
 floor = Platform((-60,250),900,50)
 socke = Sock((-60,250),'still')
 clock = pygame.time.Clock()
@@ -334,6 +350,8 @@ while True: # main game loop
        number_of_nano_steps = 10
        for i in range(number_of_nano_steps):
 	 socke.update(dt/number_of_nano_steps)
+	 for p in world:
+	   p.update(dt/number_of_nano_steps)
 	 for e in enemies:
 	   e.update(dt/number_of_nano_steps)
        pygame.display.update()
