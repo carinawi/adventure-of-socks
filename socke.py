@@ -293,25 +293,26 @@ while True: # main game loop
 	 e.draw()
       
        socke.draw()
-      
+
+       pressed = pygame.key.get_pressed()
+       if pressed[pygame.K_RIGHT]:
+             socke.start_move('right')
+             socke.Right = True
+       elif pressed[pygame.K_LEFT]:
+             socke.start_move('left')
+             socke.Right = False
+ 
        for event in pygame.event.get():
            if event.type == QUIT:
               pygame.quit()
               sys.exit()
-           elif event.type == pygame.KEYDOWN:
-	     if event.key == K_LEFT:
-               socke.start_move('left')
-               socke.Right = False
-             if event.key == K_RIGHT:
-               socke.start_move('right')
-               socke.Right = True
-             if event.key == K_UP:
-	        socke.start_jump()
-           elif event.type == pygame.KEYUP:
-	     if event.key == K_RIGHT or event.key == K_LEFT:
-	       socke.stop()
-     
-     
+           if event.type == pygame.KEYDOWN:
+              if event.key == K_UP:
+	         socke.start_jump()
+           if event.type == pygame.KEYUP:
+	     if (event.key == K_RIGHT and not pressed[K_LEFT]) or (event.key == K_LEFT and not pressed[K_RIGHT]):
+	        socke.stop()     
+
        dt = float(clock.get_time())
        number_of_nano_steps = 10
        for i in range(number_of_nano_steps):
