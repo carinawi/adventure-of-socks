@@ -5,6 +5,7 @@ from pygame.locals import *
 GRAV = 0.005 #0.005
 FPS  = 60
 
+
 class Enemy():
    visible = True
    enemysize = 40
@@ -43,6 +44,8 @@ class Star():
 
        
 class Platform():
+   vel = [0,0]
+   
    def __init__(self,anchor,length,width):
      self.anchor = anchor
      self.length = length
@@ -51,6 +54,13 @@ class Platform():
    def draw(self):
       pygame.draw.rect(DISPLAYSURF, RED, (int(round(self.anchor[0]+shift[0])), int(round(self.anchor[1]+shift[1])), self.length, self.width))
 
+   def update(self):
+      pass 
+      
+
+      
+      
+      
 class AnimatedSprite():
   def __init__(self, delay, images):
     # delay in ms
@@ -74,6 +84,7 @@ class Sock():
 
   
   JUMPING_VELOCITY = 1.1 #1.2
+  RUNNING_VELOCITY = 0.6
   
   starsnumber = 0
   
@@ -82,13 +93,13 @@ class Sock():
   height = 45
   standing_factor = 0.8
   enemy_standing_factor = 0.9
-  xvel = 0.6
+  #xvel = 0.6
   Right = True # What was the last position Socke got? Right is default...
   
   def __init__(self,pos,state):
       self.pos = list(pos)
       self.state = state 
-      self.vel = 0
+      self.vel = [0,0]
    
   def draw(self):
     x = int(round(self.pos[0] + shift[0])) #-  self.length
@@ -97,7 +108,7 @@ class Sock():
     x = x - float(self.length*0.4)
     y = y - float((self.height)*0.4)
     
-    if self.vel != 0:
+    if self.vel[1] != 0:
       if self.Right == False:#self.state == 'left':
 	self.sprite_jump_left.draw((x,y))
       else:
@@ -114,23 +125,21 @@ class Sock():
       
   def update(self,dt):
     if not self.onboard():#socke.pos[1] <= 250:
-      self.vel = self.vel + GRAV*dt
-    elif self.onboard() and self.vel < 0:
-      self.vel = self.vel + GRAV*dt
+      self.vel[1] = self.vel[1] + GRAV*dt
+    elif self.onboard() and self.vel[1] < 0:
+      self.vel[1] = self.vel[1] + GRAV*dt
     else:  
-      self.vel = 0 
+      self.vel[1] = 0 
     
     p = self.overboard(dt)
     if p :
-      self.pos[1] = min(self.pos[1] + self.vel * dt,p.anchor[1])
+      self.pos[1] = min(self.pos[1] + self.vel[1] * dt,p.anchor[1])
     else :
-      self.pos[1] = self.pos[1] + self.vel * dt
+      self.pos[1] = self.pos[1] + self.vel[1] * dt
     
-    if self.state == 'right' and not self.lefttouch():
-      self.pos[0] = self.pos[0] + self.xvel*dt
-    elif self.state == 'left'and not self.righttouch():
-      self.pos[0] = self.pos[0] - self.xvel*dt
-    
+    if (self.state == 'right' and not self.lefttouch()) or (self.state == 'left' and not self.righttouch()):
+      self.pos[0] = self.pos[0] + self.vel[0]*dt
+
     s = self.startouch()
     if(s):
        if(s.visible):
@@ -151,15 +160,19 @@ class Sock():
         
   def start_jump(self):
     if(self.onboard()):  
-      self.vel = -self.JUMPING_VELOCITY
+      self.vel[1] = -self.JUMPING_VELOCITY
     
   def start_move(self,direction):
     self.state = direction
-   
+    if direction == 'left':
+      self.vel[0] = -self.RUNNING_VELOCITY
+    elif direction == 'right':
+      self.vel[0] = self.RUNNING_VELOCITY
+     
   def stop(self):
     self.state = 'still'
-
-    
+    #self.vel[0] = 0
+  
   #Minimal berstehen darf die Socke bei ner Platform  
   def onboard(self):  
     for p in world:
@@ -189,7 +202,7 @@ class Sock():
             
       
   def overboard(self,dt):
-    proposedY = self.pos[1] + self.vel * dt
+    proposedY = self.pos[1] + self.vel[1] * dt
     for p in world:
       if (self.pos[0]) + self.standing_factor*self.length >= p.anchor[0] and (self.pos[0]+self.length)-self.standing_factor*self.length <= p.anchor[0] + p.length and self.pos[1] - p.anchor[1] <= 3 and proposedY - p.anchor[1] >= -3:
 	return p
