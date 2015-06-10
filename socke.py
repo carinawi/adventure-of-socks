@@ -5,7 +5,7 @@ from pygame.locals import *
 
 GRAV = 0.005 #0.005
 FPS  = 60
-
+CURRENT_TIME = 0
 
 class Enemy():
    visible = True
@@ -59,6 +59,14 @@ class Platform():
       self.anchor = (self.anchor[0] + dt*self.vel[0], self.anchor[1] + dt*self.vel[1])
       
 
+class Bounce(Platform):
+  
+   def __init__(self,anchor,length,width,jumpvel,standvel):
+     self.anchor = anchor
+     self.length = length
+     self.width  = width 
+     self.jumpvel = jumpvel
+     self.standvel = standvel
       
       
       
@@ -86,6 +94,10 @@ class Sock():
   
   JUMPING_VELOCITY = 1.1 #1.2
   RUNNING_VELOCITY = 0.6
+  LASTBOUNCE_TOL = 2000
+  
+  timestamp_lastbounceplatform = 0
+  lastbounceplatform           = None
   
   starsnumber = 0
   
@@ -144,7 +156,7 @@ class Sock():
       self.vel[1] = self.vel[1] + GRAV*dt
     else:  
       self.vel[1] = 0 
-    
+
     p = self.overboard(dt)
     if p:
       self.pos[1] = min(self.pos[1] + self.vel[1] * dt,p.anchor[1])
@@ -155,7 +167,9 @@ class Sock():
     if self.last_standed_platform != p:
 	self.stop()
     self.last_standed_platform = p
-      
+    if isinstance(p,Bounce):
+      self.start_jump(False)
+    
       
     if (self.vel[0] > 0 and not self.lefttouch()) or (self.vel[0] < 0 and not self.righttouch()):
       self.pos[0] = self.pos[0] + self.vel[0]*dt
@@ -178,10 +192,29 @@ class Sock():
       if(self.state == 'left'):
         self.pos[0] = self.pos[0] + 90
         
-  def start_jump(self):
-    if self.onboard():
-      self.vel[1] = -self.JUMPING_VELOCITY
+        
+  def start_jump(self,userjump):
     
+    if userjump: # this realizes whether I induced a jump actively or not
+      
+      if self.lastbounceplatform and CURRENT_TIME - self.timestamp_lastbounceplatform < self.LASTBOUNCE_TOL:
+	self.vel[1] = -self.JUMPING_VELOCITY - self.lastbounceplatform.jumpvel
+        self.lastbounceplatform = None
+        
+      if self.onboard():      
+        p = self.onboard()
+        if isinstance(p,Bounce):
+          self.vel[1] = -self.JUMPING_VELOCITY - p.jumpvel    
+        else:
+	  self.vel[1] = -self.JUMPING_VELOCITY 
+    
+    else:
+      p = self.onboard()
+      self.timestamp_lastbounceplatform = CURRENT_TIME
+      self.lastbounceplatform           = p
+      self.vel[1] = - p.standvel
+
+	
   def start_move(self,direction):
     self.state = direction
     if direction == 'left':
@@ -227,7 +260,8 @@ class Sock():
 	return p
     
     return None
-   
+  
+  
    #something is strange here..
   def startouch(self):
     for s in stars:
@@ -268,7 +302,7 @@ GREEN = (  0, 255,   0)
 BLUE = (  0,   0, 255)
 #DISPLAYSURF.fill(WHITE)
 #pygame.draw.polygon(DISPLAYSURF, GREEN, ((146, 0), (291, 106), (236, 277), (56, 277), (0, 106)))
-p1 = Platform((10,190), 50, 10)
+p1 = Bounce((10,190), 50, 10,1.5,0.5)
 p2 = Platform((90,140), 50, 10)
 p3 = Platform((190,90), 50, 10)
 p4 = Platform((230,220),50,50)
@@ -341,7 +375,7 @@ while True: # main game loop
               sys.exit()
            if event.type == pygame.KEYDOWN:
               if event.key == K_UP:
-	         socke.start_jump()
+	         socke.start_jump(True)
            if event.type == pygame.KEYUP:
 	     if (event.key == K_RIGHT and not pressed[K_LEFT]) or (event.key == K_LEFT and not pressed[K_RIGHT]):
 	        socke.stop()     
@@ -354,6 +388,7 @@ while True: # main game loop
 	   p.update(dt/number_of_nano_steps)
 	 for e in enemies:
 	   e.update(dt/number_of_nano_steps)
+	 CURRENT_TIME = CURRENT_TIME + dt
        pygame.display.update()
      
      
