@@ -45,7 +45,7 @@ class Star():
 
        
 class Platform():
-   vel = (0,0)
+   vel = [0,0]
    
    def __init__(self,anchor,length,width):
      self.anchor = anchor
@@ -68,8 +68,25 @@ class Bounce(Platform):
      self.jumpvel = jumpvel
      self.standvel = standvel
       
-      
-      
+class MovePlat(Platform):
+   
+   time_counter = 0
+   
+   def __init__(self,anchor,length,width,switchtime):
+     self.anchor = anchor
+     self.length = length
+     self.width  = width 
+     self.switchtime = switchtime
+   
+   
+   def update(self, dt):
+      self.anchor = (self.anchor[0] + dt*self.vel[0], self.anchor[1] + dt*self.vel[1])   
+      self.time_counter = self.time_counter + dt
+      if self.time_counter > self.switchtime :
+	self.vel[0] = (-1)*self.vel[0]
+        self.time_counter = 0    
+   
+   
 class AnimatedSprite():
   def __init__(self, delay, images):
     # delay in ms
@@ -170,6 +187,9 @@ class Sock():
     if isinstance(p,Bounce):
       self.start_jump(False)
     
+    #wichtig, dass die basevel nicht nur am anfang auf ner platform gesetzt wird!!!
+    if(self.state == 'still'):
+      self.vel[0] = self.basevel()[0]
       
     if (self.vel[0] > 0 and not self.lefttouch()) or (self.vel[0] < 0 and not self.righttouch()):
       self.pos[0] = self.pos[0] + self.vel[0]*dt
@@ -218,7 +238,7 @@ class Sock():
   def start_move(self,direction):
     self.state = direction
     if direction == 'left':
-      self.vel[0] = self.basevel()[0] -self.RUNNING_VELOCITY
+      self.vel[0] = self.basevel()[0] - self.RUNNING_VELOCITY
     elif direction == 'right':
       self.vel[0] = self.basevel()[0] + self.RUNNING_VELOCITY
      
@@ -302,11 +322,13 @@ GREEN = (  0, 255,   0)
 BLUE = (  0,   0, 255)
 #DISPLAYSURF.fill(WHITE)
 #pygame.draw.polygon(DISPLAYSURF, GREEN, ((146, 0), (291, 106), (236, 277), (56, 277), (0, 106)))
+p0 = MovePlat((-50,190),50,10,2000)
 p1 = Bounce((10,190), 50, 10,1.5,0.5)
 p2 = Platform((90,140), 50, 10)
 p3 = Platform((190,90), 50, 10)
 p4 = Platform((230,220),50,50)
 p4.vel = (0.01, 0)
+p0.vel = list((-0.05,0))
 floor = Platform((-60,250),900,50)
 socke = Sock((-60,250),'still')
 clock = pygame.time.Clock()
@@ -314,7 +336,7 @@ s1 = Star((270,70))
 s2 = Star((360,240))
 e1 = Enemy((390,220),1)
 stars = [s1,s2]
-world = [floor,p1,p2,p3,p4]
+world = [floor,p1,p2,p3,p4,p0]
 enemies = [e1]
 shift = list((0,0))
 
