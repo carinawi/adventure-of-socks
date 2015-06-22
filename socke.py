@@ -7,6 +7,35 @@ GRAV = 0.005 #0.005
 FPS  = 60
 CURRENT_TIME = 0
 
+class World():
+  
+  def __init__(self, stars, enemies, platforms):
+    self.stars = stars 
+    self.enemies = enemies 
+    self.platforms = platforms
+  
+  def set_init(self):
+    for s in self.stars:
+      s.visible = True
+    for e in self.enemies:
+      e.visible = True
+    
+  def draw_world(self):
+    for s in self.stars:
+      s.draw()
+    for e in self.enemies:
+      e.draw()
+    for p in self.platforms:
+      p.draw()
+   
+  def update_world(self,dt, number_of_nano_steps): 
+    for p in self.platforms:
+      p.update(dt/number_of_nano_steps)
+    for e in self.enemies:
+      e.update(dt/number_of_nano_steps)
+      
+      
+      
 class Enemy():
    visible = True
    enemysize = 40
@@ -338,6 +367,7 @@ e1 = Enemy((390,220),1)
 stars = [s1,s2]
 world = [floor,p1,p2,p3,p4,p0]
 enemies = [e1]
+w1 = World(stars, enemies, world)
 shift = list((0,0))
 
 font=pygame.font.Font(None,30)
@@ -359,11 +389,11 @@ while True: # main game loop
               sys.exit()
            if event.type == pygame.KEYUP:
 	      socke = Sock((10,250),'still')
-	      for s in stars:
-		s.visible = True
-              for e in enemies:
-		e.visible = True
-              
+	      #for s in stars:
+		#s.visible = True
+              #for e in enemies:
+		#e.visible = True
+              w1.set_init()
      else: 
        clock.tick(FPS)
        DISPLAYSURF.fill(WHITE)
@@ -372,15 +402,16 @@ while True: # main game loop
        texts(socke.hearts,(70,5),BLACK)
        texts('Hearts:',(0,5),BLACK)
        shift = list((-socke.pos[0]+200,-socke.pos[1]+250))
-       for p in world:
-         p.draw()
+       #for p in world:
+        # p.draw()
      
-       for s in stars:
-	 s.draw()
+       #for s in stars:
+	# s.draw()
        
-       for e in enemies:
-	 e.draw()
-      
+       #for e in enemies:
+	# e.draw()
+       
+       w1.draw_world()
        socke.draw()
 
        pressed = pygame.key.get_pressed()
@@ -406,10 +437,11 @@ while True: # main game loop
        number_of_nano_steps = 10
        for i in range(number_of_nano_steps):
 	 socke.update(dt/number_of_nano_steps)
-	 for p in world:
-	   p.update(dt/number_of_nano_steps)
-	 for e in enemies:
-	   e.update(dt/number_of_nano_steps)
+	 #for p in world:
+	  # p.update(dt/number_of_nano_steps)
+	 #for e in enemies:
+	  # e.update(dt/number_of_nano_steps)
+	 w1.update_world(dt, number_of_nano_steps)
 	 CURRENT_TIME = CURRENT_TIME + dt
        pygame.display.update()
      
