@@ -7,6 +7,43 @@ GRAV = 0.005 #0.005
 FPS  = 60
 CURRENT_TIME = 0
 
+class Camera():
+  Kp = [0.013, 0.0113]
+  Ki = [0.0000001, 0.0000001]
+  Kd = [0.0001, 0.0001]
+  
+  def __init__(self,pos,vel):
+    self.pos = list(pos)
+    self.old_pos = list(pos)
+    self.vel = list(vel)
+    self.integrand = [0,0]
+
+  def  update(self,dt,socke):
+
+    target_pos = list(socke.pos)
+    if socke.Right:
+      target_pos[0] = target_pos[0] + 100
+    else:
+      target_pos[0] = target_pos[0] - 100
+  
+    print("######", self.pos, target_pos)
+    self.integrand[0] = self.integrand[0] + dt*(target_pos[0] - self.pos[0])
+    self.integrand[1] = self.integrand[1] + dt*(target_pos[1] - self.pos[1])
+    
+    
+    
+    self.vel[0] = dt*( self.Kp[0] * (target_pos[0] - self.pos[0]) + self.Ki[0] * (self.integrand[0]) + self.Kd[0] * ((target_pos[0] - self.pos[0]) - (socke.old_pos[0] - self.old_pos[0]))/dt)
+    self.vel[1] = dt*( self.Kp[1] * (target_pos[1] - self.pos[1]) + self.Ki[1] * (self.integrand[1]) + self.Kd[1] * ((target_pos[1] - self.pos[1]) - (socke.old_pos[1] - self.old_pos[1]))/dt)
+    
+    if abs(self.pos[1] - target_pos[1]) < 100 and not (abs(socke.vel[1]) < 0.01):  # and socke.vel[1] < 0:
+      self.vel[1] = 0
+    
+    self.old_pos = list(self.pos) 
+    self.pos[0] = self.pos[0] + self.vel[0] * dt
+    self.pos[1] = self.pos[1] + self.vel[1] * dt
+    print("!!!!!!", self.integrand)
+    
+    
 class World():
   
   def __init__(self, stars, enemies, platforms):
@@ -137,7 +174,7 @@ class Sock():
   sprite_jump_right = AnimatedSprite(50, [ pygame.image.load("jump.png")  ])
   sprite_jump_left  = AnimatedSprite(50, [ pygame.transform.flip(pygame.image.load("jump.png"),True,False) ])
 
-  
+  old_pos = None
   JUMPING_VELOCITY = 1.1 #1.2
   RUNNING_VELOCITY = 0.6
   LASTBOUNCE_TOL = 2000
@@ -157,6 +194,7 @@ class Sock():
   
   def __init__(self,pos,state):
       self.pos = list(pos)
+      self.old_pos = list(pos)
       self.state = state 
       self.vel = [0,0]
       
@@ -196,6 +234,9 @@ class Sock():
     return self.vel[0] == self.basevel()[0]
 	
   def update(self,dt):
+    
+    self.old_pos = list(self.pos)
+    
     if not self.onboard():#socke.pos[1] <= 250:
       self.vel[1] = self.vel[1] + GRAV*dt
     elif self.onboard() and self.vel[1] < 0:
@@ -359,7 +400,7 @@ p4 = Platform((230,220),50,50)
 p4.vel = (0.01, 0)
 p0.vel = list((-0.05,0))
 floor = Platform((-60,250),900,50)
-socke = Sock((-60,250),'still')
+socke = Sock((-60.0,250.0),'still')
 clock = pygame.time.Clock()
 s1 = Star((270,70))
 s2 = Star((360,240))
@@ -369,6 +410,7 @@ world = [floor,p1,p2,p3,p4,p0]
 enemies = [e1]
 w1 = World(stars, enemies, world)
 shift = list((0,0))
+camera = Camera(list((socke.pos[0],socke.pos[1])), (0,0))
 
 font=pygame.font.Font(None,30)
 
@@ -388,7 +430,8 @@ while True: # main game loop
               pygame.quit()
               sys.exit()
            if event.type == pygame.KEYUP:
-	      socke = Sock((10,250),'still')
+	      socke = Sock((10.0,250.0),'still')
+	      camera = Camera(list((socke.pos[0],socke.pos[1])), (0,0))
 	      #for s in stars:
 		#s.visible = True
               #for e in enemies:
@@ -401,7 +444,11 @@ while True: # main game loop
        texts('Stars:',(270,5),BLACK)
        texts(socke.hearts,(70,5),BLACK)
        texts('Hearts:',(0,5),BLACK)
-       shift = list((-socke.pos[0]+200,-socke.pos[1]+250))
+       
+       #shift = list((-socke.pos[0]+200,-socke.pos[1]+250))
+       
+       shift = [200 - camera.pos[0], 250 - camera.pos[1]] 
+       print(shift)
        #for p in world:
         # p.draw()
      
@@ -442,6 +489,8 @@ while True: # main game loop
 	 #for e in enemies:
 	  # e.update(dt/number_of_nano_steps)
 	 w1.update_world(dt, number_of_nano_steps)
+	 camera.update(dt/number_of_nano_steps,socke)
+	 print(camera.pos)
 	 CURRENT_TIME = CURRENT_TIME + dt
        pygame.display.update()
      
