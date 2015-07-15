@@ -8,40 +8,62 @@ FPS  = 60
 CURRENT_TIME = 0
 
 class Camera():
-  Kp = [0.013, 0.0113]
-  Ki = [0.0000001, 0.0000001]
-  Kd = [0.0001, 0.0001]
+  
+  #implements PID controller
+  Kp = [0.0000013, 0.0113]
+  Ki = [0.000000001, 0.0000001]
+  Kd = [0.000001, 0.0001]
+  
+  #0.00013, 0.0000001, 0.0001
+  
+  Kp2 = 0.00013
+  Ki2 = 0.0000001
+  Kd2 = 0.0001
   
   def __init__(self,pos,vel):
     self.pos = list(pos)
     self.old_pos = list(pos)
     self.vel = list(vel)
     self.integrand = [0,0]
-
+    self.integrand3 = 0
+    self.addvel = 0
+    
   def  update(self,dt,socke):
 
+    # abstand zum rand je nach blickrichtung
     target_pos = list(socke.pos)
+    
+    # folge der kamera
+    target_pos2 = list(socke.pos)
+    
+    
     if socke.Right:
       target_pos[0] = target_pos[0] + 100
     else:
       target_pos[0] = target_pos[0] - 100
   
-    print("######", self.pos, target_pos)
+    #print("######", self.pos, target_pos)
     self.integrand[0] = self.integrand[0] + dt*(target_pos[0] - self.pos[0])
     self.integrand[1] = self.integrand[1] + dt*(target_pos[1] - self.pos[1])
     
+    #folge der kamera
+    self.integrand3 = self.integrand3 + dt*(target_pos2[0] - self.pos[0])
     
     
     self.vel[0] = dt*( self.Kp[0] * (target_pos[0] - self.pos[0]) + self.Ki[0] * (self.integrand[0]) + self.Kd[0] * ((target_pos[0] - self.pos[0]) - (socke.old_pos[0] - self.old_pos[0]))/dt)
     self.vel[1] = dt*( self.Kp[1] * (target_pos[1] - self.pos[1]) + self.Ki[1] * (self.integrand[1]) + self.Kd[1] * ((target_pos[1] - self.pos[1]) - (socke.old_pos[1] - self.old_pos[1]))/dt)
     
+    #weitere geschwindigkeit
+    self.addvel = dt*( self.Kp2 * (target_pos2[0] - self.pos[0]) + self.Ki2 * (self.integrand3) + self.Kd2 * ((target_pos2[0] - self.pos[0]) - (socke.old_pos[0] - self.old_pos[0]))/dt)
+    
     if abs(self.pos[1] - target_pos[1]) < 100 and not (abs(socke.vel[1]) < 0.01):  # and socke.vel[1] < 0:
       self.vel[1] = 0
     
-    self.old_pos = list(self.pos) 
-    self.pos[0] = self.pos[0] + self.vel[0] * dt
+    self.old_pos = list(self.pos)
+    
+    self.pos[0] = self.pos[0] + (self.vel[0] + self.addvel) * dt
     self.pos[1] = self.pos[1] + self.vel[1] * dt
-    print("!!!!!!", self.integrand)
+    #print("!!!!!!", self.integrand)
     
     
 class World():
