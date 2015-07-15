@@ -7,6 +7,16 @@ GRAV = 0.005 #0.005
 FPS  = 60
 CURRENT_TIME = 0
 
+class PIDController():
+  def __init__(self,Kp,Ki,Kd,pos,vel,target):
+    pass
+
+  def set_target(self, target):
+    self.target = target
+   
+  def update(self, dt):
+    pass
+
 class Camera():
   
   #implements PID controller
