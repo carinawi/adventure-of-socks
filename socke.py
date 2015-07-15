@@ -10,61 +10,62 @@ CURRENT_TIME = 0
 class Camera():
   
   #implements PID controller
-  Kp = [0.0000013, 0.0113]
-  Ki = [0.000000001, 0.0000001]
+  Kp = [0.013, 0.0113]
+  Ki = [0.0000001, 0.0000001]
   Kd = [0.000001, 0.0001]
   
   #0.00013, 0.0000001, 0.0001
   
-  Kp2 = 0.00013
-  Ki2 = 0.0000001
-  Kd2 = 0.0001
+  Kp_delta = [0.00113, 0]
+  Ki_delta = [0.000000001, 0]
+  Kd_delta = [0.0001, 0]
   
   def __init__(self,pos,vel):
     self.pos = list(pos)
     self.old_pos = list(pos)
     self.vel = list(vel)
     self.integrand = [0,0]
-    self.integrand3 = 0
-    self.addvel = 0
-    
+    self.integrand_delta = [0,0]
+    self.delta = [0,0]
+    self.delta_vel = [0,0]
+    self.old_delta = [0,0]
+    self.old_target = list(pos)
+    self.old_target_delta = [0,0]
+   
   def  update(self,dt,socke):
 
     # abstand zum rand je nach blickrichtung
-    target_pos = list(socke.pos)
-    
-    # folge der kamera
-    target_pos2 = list(socke.pos)
-    
-    
-    if socke.Right:
-      target_pos[0] = target_pos[0] + 100
-    else:
-      target_pos[0] = target_pos[0] - 100
+    target_pos = [socke.pos[0] + self.delta[0], socke.pos[1] + self.delta[1]]
+    target_delta = [100,0] if socke.Right else [-100,0]
   
     #print("######", self.pos, target_pos)
     self.integrand[0] = self.integrand[0] + dt*(target_pos[0] - self.pos[0])
     self.integrand[1] = self.integrand[1] + dt*(target_pos[1] - self.pos[1])
     
     #folge der kamera
-    self.integrand3 = self.integrand3 + dt*(target_pos2[0] - self.pos[0])
+    self.integrand_delta[0] = self.integrand_delta[0] + dt*(target_delta[0] - self.delta[0])
+    self.integrand_delta[1] = self.integrand_delta[1] + dt*(target_delta[1] - self.delta[1])
+  
+    self.vel[0] = dt*( self.Kp[0] * (target_pos[0] - self.pos[0]) + self.Ki[0] * (self.integrand[0]) + self.Kd[0] * ((target_pos[0] - self.pos[0]) - (self.old_target[0] - self.old_pos[0]))/dt)
+    self.vel[1] = dt*( self.Kp[1] * (target_pos[1] - self.pos[1]) + self.Ki[1] * (self.integrand[1]) + self.Kd[1] * ((target_pos[1] - self.pos[1]) - (self.old_target[1] - self.old_pos[1]))/dt)
     
-    
-    self.vel[0] = dt*( self.Kp[0] * (target_pos[0] - self.pos[0]) + self.Ki[0] * (self.integrand[0]) + self.Kd[0] * ((target_pos[0] - self.pos[0]) - (socke.old_pos[0] - self.old_pos[0]))/dt)
-    self.vel[1] = dt*( self.Kp[1] * (target_pos[1] - self.pos[1]) + self.Ki[1] * (self.integrand[1]) + self.Kd[1] * ((target_pos[1] - self.pos[1]) - (socke.old_pos[1] - self.old_pos[1]))/dt)
-    
-    #weitere geschwindigkeit
-    self.addvel = dt*( self.Kp2 * (target_pos2[0] - self.pos[0]) + self.Ki2 * (self.integrand3) + self.Kd2 * ((target_pos2[0] - self.pos[0]) - (socke.old_pos[0] - self.old_pos[0]))/dt)
-    
+    self.delta_vel[0] = dt*( self.Kp_delta[0] * (target_delta[0] - self.delta[0]) + self.Ki_delta[0] * (self.integrand_delta[0]) + self.Kd_delta[0] * ((target_delta[0] - self.delta[0]) - (self.old_target_delta[0] - self.old_delta[0]))/dt)
+    self.delta_vel[1] = dt*( self.Kp_delta[1] * (target_delta[1] - self.delta[1]) + self.Ki_delta[1] * (self.integrand_delta[1]) + self.Kd_delta[1] * ((target_delta[1] - self.delta[1]) - (self.old_target_delta[1] - self.old_delta[1]))/dt)
+   
     if abs(self.pos[1] - target_pos[1]) < 100 and not (abs(socke.vel[1]) < 0.01):  # and socke.vel[1] < 0:
       self.vel[1] = 0
     
-    self.old_pos = list(self.pos)
+    self.old_pos   = list(self.pos)
+    self.old_delta = list(self.delta)
+    self.old_target = list(target_pos)
+    self.old_target_delta = list(target_delta)
     
-    self.pos[0] = self.pos[0] + (self.vel[0] + self.addvel) * dt
+    self.pos[0] = self.pos[0] + self.vel[0] * dt
     self.pos[1] = self.pos[1] + self.vel[1] * dt
-    #print("!!!!!!", self.integrand)
     
+    self.delta[0] = self.delta[0] + self.delta_vel[0] * dt
+    self.delta[1] = self.delta[1] + self.delta_vel[1] * dt
+   
     
 class World():
   
@@ -196,7 +197,6 @@ class Sock():
   sprite_jump_right = AnimatedSprite(50, [ pygame.image.load("jump.png")  ])
   sprite_jump_left  = AnimatedSprite(50, [ pygame.transform.flip(pygame.image.load("jump.png"),True,False) ])
 
-  old_pos = None
   JUMPING_VELOCITY = 1.1 #1.2
   RUNNING_VELOCITY = 0.6
   LASTBOUNCE_TOL = 2000
@@ -459,6 +459,7 @@ while True: # main game loop
               #for e in enemies:
 		#e.visible = True
               w1.set_init()
+              clock.tick(FPS)
      else: 
        clock.tick(FPS)
        DISPLAYSURF.fill(WHITE)
@@ -470,7 +471,6 @@ while True: # main game loop
        #shift = list((-socke.pos[0]+200,-socke.pos[1]+250))
        
        shift = [200 - camera.pos[0], 250 - camera.pos[1]] 
-       print(shift)
        #for p in world:
         # p.draw()
      
@@ -512,7 +512,6 @@ while True: # main game loop
 	  # e.update(dt/number_of_nano_steps)
 	 w1.update_world(dt, number_of_nano_steps)
 	 camera.update(dt/number_of_nano_steps,socke)
-	 print(camera.pos)
 	 CURRENT_TIME = CURRENT_TIME + dt
        pygame.display.update()
      
