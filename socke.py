@@ -197,6 +197,16 @@ class AnimatedSprite():
   def draw(self,pos):
     DISPLAYSURF.blit(self.images[(self.ticks / self.delay) % len(self.images)], pos)
     self.ticks = self.ticks + 1
+
+class Background():
+  
+  def __init__(self,images):
+    self.images = images
+    
+  def draw(self, socke):
+    for i in self.images:
+      DISPLAYSURF.blit(i[0], (i[1]*(0*shift[0]-socke.pos[0]),shift[1]))
+      
       
       
 class Sock():
@@ -417,6 +427,11 @@ class Sock():
 pygame.init()
 DISPLAYSURF = pygame.display.set_mode((400, 300))
 pygame.display.set_caption('Hello World!')
+back11  = pygame.image.load("back_11_small.png")
+back12  = pygame.image.load("back_12_small.png")
+back13  = pygame.image.load("back_13_small.png")
+back1 = Background([(back11,0.05), (back12,0.1), (back13,0.3)])
+shift = list((0,0))
 BLACK = (  0,   0,   0)
 WHITE = (255, 255, 255)
 RED = (255,   0,   0)
@@ -441,7 +456,6 @@ stars = [s1,s2]
 world = [floor,p1,p2,p3,p4,p0]
 enemies = [e1]
 w1 = World(stars, enemies, world)
-shift = list((0,0))
 camera = Camera(list((socke.pos[0],socke.pos[1])), (0,0))
 
 font=pygame.font.Font(None,30)
@@ -470,9 +484,10 @@ while True: # main game loop
 		#e.visible = True
               w1.set_init()
               clock.tick(FPS)
+              back1.draw(socke)
      else: 
        clock.tick(FPS)
-       DISPLAYSURF.fill(WHITE)
+       #DISPLAYSURF.fill(WHITE)
        texts(socke.starsnumber,(330,5),BLACK)
        texts('Stars:',(270,5),BLACK)
        texts(socke.hearts,(70,5),BLACK)
@@ -489,7 +504,8 @@ while True: # main game loop
        
        #for e in enemies:
 	# e.draw()
-       
+
+       back1.draw(socke)
        w1.draw_world()
        socke.draw()
 
@@ -524,5 +540,4 @@ while True: # main game loop
 	 camera.update(dt/number_of_nano_steps,socke)
 	 CURRENT_TIME = CURRENT_TIME + dt
        pygame.display.update()
-     
      
