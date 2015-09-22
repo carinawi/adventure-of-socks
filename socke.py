@@ -200,26 +200,23 @@ class AnimatedSprite():
     self.ticks = self.ticks + 1
 
 class Background():
-  
+  # das erste image muss das hinterste sein. Denn dieses wird nach oben unbegrenzt wiederholt.  
   def __init__(self,images):
     self.images = images
     
   def draw(self, socke):
     counter = 1
     for i in self.images:
-      for j in range(-100,100):
-	 if ((i[1]*shift[0] + j*900) < 1000) and ((i[1]*shift[0] + j*900) > -1000):
-	   DISPLAYSURF.blit(i[0], (i[1]*shift[0] + j*900, shift[1]))
-         if counter == 1:
+      DISPLAYSURF.blit(i[0], (i[1]*shift[0] % 900 - 900, shift[1]))
+      DISPLAYSURF.blit(i[0], (i[1]*shift[0] % 900, shift[1]))
+      DISPLAYSURF.blit(i[0], (i[1]*shift[0] % 900 + 900, shift[1]))
+
+      if counter == 1:
            #if (shift[1] < -500):
-	    DISPLAYSURF.blit(i[0], (i[1]*shift[0] + j*900, shift[1]-600))  
-   
-      #DISPLAYSURF.blit(i[0], (i[1]*shift[0], shift[1]))
-      #DISPLAYSURF.blit(i[0], (i[1]*shift[0] + 900, shift[1])) # j * 900
-      #DISPLAYSURF.blit(i[0], (i[1]*shift[0] - 900, shift[1])) # - j * 900
-      #if counter == 1:
-       # DISPLAYSURF.blit(i[0], (i[1]*shift[0], shift[1]-600))
-    
+	    DISPLAYSURF.blit(i[0], (i[1]*shift[0] % 900 - 900, shift[1]-600))  
+	    DISPLAYSURF.blit(i[0], (i[1]*shift[0] % 900, shift[1]-600))  
+	    DISPLAYSURF.blit(i[0], (i[1]*shift[0] % 900 + 900, shift[1]-600))  
+
       counter = counter + 1
       
       
@@ -518,11 +515,11 @@ while True: # main game loop
 	# e.draw()
 
        #dt = float(clock.get_time())
-       print dt
+       #print dt
        number_of_nano_steps = 10
        for i in range(number_of_nano_steps):
 	 socke.update(dt/number_of_nano_steps)
-	 #for p in world:
+	  #for p in world:
 	  # p.update(dt/number_of_nano_steps)
 	 #for e in enemies:
 	  # e.update(dt/number_of_nano_steps)
