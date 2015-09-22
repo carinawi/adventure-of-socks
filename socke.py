@@ -205,9 +205,22 @@ class Background():
     self.images = images
     
   def draw(self, socke):
+    counter = 1
     for i in self.images:
-      DISPLAYSURF.blit(i[0], (i[1]*(0*shift[0]-socke.pos[0]),shift[1]))
-      
+      for j in range(-100,100):
+	 if ((i[1]*shift[0] + j*900) < 1000) and ((i[1]*shift[0] + j*900) > -1000):
+	   DISPLAYSURF.blit(i[0], (i[1]*shift[0] + j*900, shift[1]))
+         if counter == 1:
+           #if (shift[1] < -500):
+	    DISPLAYSURF.blit(i[0], (i[1]*shift[0] + j*900, shift[1]-600))  
+   
+      #DISPLAYSURF.blit(i[0], (i[1]*shift[0], shift[1]))
+      #DISPLAYSURF.blit(i[0], (i[1]*shift[0] + 900, shift[1])) # j * 900
+      #DISPLAYSURF.blit(i[0], (i[1]*shift[0] - 900, shift[1])) # - j * 900
+      #if counter == 1:
+       # DISPLAYSURF.blit(i[0], (i[1]*shift[0], shift[1]-600))
+    
+      counter = counter + 1
       
       
 class Sock():
@@ -445,9 +458,9 @@ p1 = Bounce((10,190), 50, 10,1.5,0.5)
 p2 = Platform((90,140), 50, 10)
 p3 = Platform((190,90), 50, 10)
 p4 = Platform((230,220),50,50)
-p4.vel = (0.01, 0)
+p4.vel = (0.1,0)#(0.01, 0)
 p0.vel = list((-0.05,0))
-floor = Platform((-60,250),900,50)
+floor = Platform((-60,250),90000,50)
 socke = Sock((-60.0,250.0),'still')
 clock = pygame.time.Clock()
 s1 = Star((270,70))
