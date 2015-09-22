@@ -501,15 +501,13 @@ while True: # main game loop
               back1.draw(socke)
      else: 
        clock.tick(FPS)
+       dt = float(clock.get_time())
        #DISPLAYSURF.fill(WHITE)
-       texts(socke.starsnumber,(330,5),BLACK)
-       texts('Stars:',(270,5),BLACK)
-       texts(socke.hearts,(70,5),BLACK)
-       texts('Hearts:',(0,5),BLACK)
        
        #shift = list((-socke.pos[0]+200,-socke.pos[1]+250))
        
-       shift = [200 - camera.pos[0], 250 - camera.pos[1]] 
+       shift = [200 - camera.pos[0], 250 - camera.pos[1]]
+       # ohne PID-Regelung: shift = [200 - socke.pos[0], 250 - socke.pos[1]]
        #for p in world:
         # p.draw()
      
@@ -519,10 +517,29 @@ while True: # main game loop
        #for e in enemies:
 	# e.draw()
 
+       #dt = float(clock.get_time())
+       print dt
+       number_of_nano_steps = 10
+       for i in range(number_of_nano_steps):
+	 socke.update(dt/number_of_nano_steps)
+	 #for p in world:
+	  # p.update(dt/number_of_nano_steps)
+	 #for e in enemies:
+	  # e.update(dt/number_of_nano_steps)
+	 w1.update_world(dt/number_of_nano_steps)
+	 camera.update(dt/number_of_nano_steps,socke)
+       CURRENT_TIME = CURRENT_TIME + dt
+
        back1.draw(socke)
        w1.draw_world()
        socke.draw()
 
+       texts(socke.starsnumber,(330,5),BLACK)
+       texts('Stars:',(270,5),BLACK)
+       texts(socke.hearts,(70,5),BLACK)
+       texts('Hearts:',(0,5),BLACK)
+
+       
        pressed = pygame.key.get_pressed()
        if pressed[pygame.K_RIGHT]:
              socke.start_move('right')
@@ -541,17 +558,5 @@ while True: # main game loop
            if event.type == pygame.KEYUP:
 	     if (event.key == K_RIGHT and not pressed[K_LEFT]) or (event.key == K_LEFT and not pressed[K_RIGHT]):
 	        socke.stop()     
-
-       dt = float(clock.get_time())
-       number_of_nano_steps = 10
-       for i in range(number_of_nano_steps):
-	 socke.update(dt/number_of_nano_steps)
-	 #for p in world:
-	  # p.update(dt/number_of_nano_steps)
-	 #for e in enemies:
-	  # e.update(dt/number_of_nano_steps)
-	 w1.update_world(dt, number_of_nano_steps)
-	 camera.update(dt/number_of_nano_steps,socke)
-	 CURRENT_TIME = CURRENT_TIME + dt
        pygame.display.update()
      
