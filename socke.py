@@ -98,11 +98,11 @@ class World():
     for p in self.platforms:
       p.draw()
    
-  def update_world(self,dt, number_of_nano_steps): 
+  def update_world(self,dt): 
     for p in self.platforms:
-      p.update(dt/number_of_nano_steps)
+      p.update(dt)
     for e in self.enemies:
-      e.update(dt/number_of_nano_steps)
+      e.update(dt)
       
       
       
@@ -191,7 +191,8 @@ class AnimatedSprite():
     # delay in ms
     self.images = images
     self.delay  = delay * FPS / 1000 # dieses delay in Anzahl Frames
-    print self.delay
+    if self.delay == 0:
+	raise RuntimeError("FPS zu niedrig fuer Animation!")
     self.ticks  = 0
     
   def draw(self,pos):
