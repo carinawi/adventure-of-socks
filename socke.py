@@ -24,11 +24,15 @@ class Camera():
   Ki = [0.0000001, 0.0000001]
   Kd = [0.000001, 0.0001]
   
+ 
+  
   #0.00013, 0.0000001, 0.0001
   
   Kp_delta = [0.00113, 0]
   Ki_delta = [0.000000001, 0]
   Kd_delta = [0.0001, 0]
+  
+  
   
   def __init__(self,pos,vel):
     self.pos = list(pos)
@@ -76,6 +80,9 @@ class Camera():
     self.delta[0] = self.delta[0] + self.delta_vel[0] * dt
     self.delta[1] = self.delta[1] + self.delta_vel[1] * dt
    
+   
+    self.pos[0] = socke.pos[0]
+    self.pos[1] = socke.pos[1]
     
 class World():
   
@@ -316,7 +323,7 @@ class Sock():
       
     if (self.vel[0] > 0 and not self.lefttouch()) or (self.vel[0] < 0 and not self.righttouch()):
       self.pos[0] = self.pos[0] + self.vel[0]*dt
-
+ 
     s = self.startouch()
     if(s):
        if(s.visible):
@@ -503,7 +510,7 @@ while True: # main game loop
        
        #shift = list((-socke.pos[0]+200,-socke.pos[1]+250))
        
-       shift = [200 - camera.pos[0], 250 - camera.pos[1]]
+       #shift = [200 - camera.pos[0], 250 - camera.pos[1]]
        # ohne PID-Regelung: shift = [200 - socke.pos[0], 250 - socke.pos[1]]
        #for p in world:
         # p.draw()
@@ -525,8 +532,11 @@ while True: # main game loop
 	  # e.update(dt/number_of_nano_steps)
 	 w1.update_world(dt/number_of_nano_steps)
 	 camera.update(dt/number_of_nano_steps,socke)
+	 
        CURRENT_TIME = CURRENT_TIME + dt
-
+       
+       shift = [200 - camera.pos[0], 250 - camera.pos[1]]
+       
        back1.draw(socke)
        w1.draw_world()
        socke.draw()
