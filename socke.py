@@ -60,11 +60,11 @@ class Camera():
     self.integrand_delta[0] = self.integrand_delta[0] + dt*(target_delta[0] - self.delta[0])
     self.integrand_delta[1] = self.integrand_delta[1] + dt*(target_delta[1] - self.delta[1])
   
-    self.vel[0] = dt*( self.Kp[0] * (target_pos[0] - self.pos[0]) + self.Ki[0] * (self.integrand[0]) + self.Kd[0] * ((target_pos[0] - self.pos[0]) - (self.old_target[0] - self.old_pos[0]))/dt)
-    self.vel[1] = dt*( self.Kp[1] * (target_pos[1] - self.pos[1]) + self.Ki[1] * (self.integrand[1]) + self.Kd[1] * ((target_pos[1] - self.pos[1]) - (self.old_target[1] - self.old_pos[1]))/dt)
+    self.vel[0] = ( self.Kp[0] * (target_pos[0] - self.pos[0]) + self.Ki[0] * (self.integrand[0]) + self.Kd[0] * ((target_pos[0] - self.pos[0]) - (self.old_target[0] - self.old_pos[0]))/dt)
+    self.vel[1] = ( self.Kp[1] * (target_pos[1] - self.pos[1]) + self.Ki[1] * (self.integrand[1]) + self.Kd[1] * ((target_pos[1] - self.pos[1]) - (self.old_target[1] - self.old_pos[1]))/dt)
     
-    self.delta_vel[0] = dt*( self.Kp_delta[0] * (target_delta[0] - self.delta[0]) + self.Ki_delta[0] * (self.integrand_delta[0]) + self.Kd_delta[0] * ((target_delta[0] - self.delta[0]) - (self.old_target_delta[0] - self.old_delta[0]))/dt)
-    self.delta_vel[1] = dt*( self.Kp_delta[1] * (target_delta[1] - self.delta[1]) + self.Ki_delta[1] * (self.integrand_delta[1]) + self.Kd_delta[1] * ((target_delta[1] - self.delta[1]) - (self.old_target_delta[1] - self.old_delta[1]))/dt)
+    self.delta_vel[0] = ( self.Kp_delta[0] * (target_delta[0] - self.delta[0]) + self.Ki_delta[0] * (self.integrand_delta[0]) + self.Kd_delta[0] * ((target_delta[0] - self.delta[0]) - (self.old_target_delta[0] - self.old_delta[0]))/dt)
+    self.delta_vel[1] = ( self.Kp_delta[1] * (target_delta[1] - self.delta[1]) + self.Ki_delta[1] * (self.integrand_delta[1]) + self.Kd_delta[1] * ((target_delta[1] - self.delta[1]) - (self.old_target_delta[1] - self.old_delta[1]))/dt)
    
     if abs(self.pos[1] - target_pos[1]) < 100 and not (abs(socke.vel[1]) < 0.01):  # and socke.vel[1] < 0:
       self.vel[1] = 0
@@ -81,8 +81,8 @@ class Camera():
     self.delta[1] = self.delta[1] + self.delta_vel[1] * dt
    
    
-    self.pos[0] = socke.pos[0]
-    self.pos[1] = socke.pos[1]
+    #self.pos[0] = socke.pos[0]
+    #self.pos[1] = socke.pos[1]
     
 class World():
   
@@ -566,4 +566,3 @@ while True: # main game loop
 	     if (event.key == K_RIGHT and not pressed[K_LEFT]) or (event.key == K_LEFT and not pressed[K_RIGHT]):
 	        socke.stop()     
        pygame.display.update()
-     
