@@ -9,7 +9,6 @@ CURRENT_TIME = 0
 
 
 class PIDController():
-
     def __init__(self, Kp, Ki, Kd, pos, vel, target):
         pass
 
@@ -25,8 +24,6 @@ class Camera():
     Kp = [0.013, 0.0113]
     Ki = [0.0000001, 0.0000001]
     Kd = [0.000001, 0.0001]
-
-    #0.00013, 0.0000001, 0.0001
 
     Kp_delta = [0.00113, 0]
     Ki_delta = [0.000000001, 0]
@@ -45,33 +42,28 @@ class Camera():
         self.old_target_delta = [0, 0]
 
     def update(self, dt, socke):
-
         # abstand zum rand je nach blickrichtung
         target_pos = [socke.pos[0] + self.delta[0],
                       socke.pos[1] + self.delta[1]]
         target_delta = [100, 0] if socke.Right else [-100, 0]
 
         # print("######", self.pos, target_pos)
-        self.integrand[0] = self.integrand[0] + \
-            dt * (target_pos[0] - self.pos[0])
-        self.integrand[1] = self.integrand[1] + \
-            dt * (target_pos[1] - self.pos[1])
+        self.integrand[0] = self.integrand[0] + dt * (target_pos[0] - self.pos[0])
+        self.integrand[1] = self.integrand[1] + dt * (target_pos[1] - self.pos[1])
 
         # folge der kamera
-        self.integrand_delta[0] = self.integrand_delta[
-            0] + dt * (target_delta[0] - self.delta[0])
-        self.integrand_delta[1] = self.integrand_delta[
-            1] + dt * (target_delta[1] - self.delta[1])
+        self.integrand_delta[0] = self.integrand_delta[0] + dt * (target_delta[0] - self.delta[0])
+        self.integrand_delta[1] = self.integrand_delta[1] + dt * (target_delta[1] - self.delta[1])
 
         self.vel[0] = (self.Kp[0] * (target_pos[0] - self.pos[0]) + self.Ki[0] * (self.integrand[0]) +
                        self.Kd[0] * ((target_pos[0] - self.pos[0]) - (self.old_target[0] - self.old_pos[0])) / dt)
         self.vel[1] = (self.Kp[1] * (target_pos[1] - self.pos[1]) + self.Ki[1] * (self.integrand[1]) +
                        self.Kd[1] * ((target_pos[1] - self.pos[1]) - (self.old_target[1] - self.old_pos[1])) / dt)
 
-        self.delta_vel[0] = (self.Kp_delta[0] * (target_delta[0] - self.delta[0]) + self.Ki_delta[0] * (self.integrand_delta[
-                             0]) + self.Kd_delta[0] * ((target_delta[0] - self.delta[0]) - (self.old_target_delta[0] - self.old_delta[0])) / dt)
-        self.delta_vel[1] = (self.Kp_delta[1] * (target_delta[1] - self.delta[1]) + self.Ki_delta[1] * (self.integrand_delta[
-                             1]) + self.Kd_delta[1] * ((target_delta[1] - self.delta[1]) - (self.old_target_delta[1] - self.old_delta[1])) / dt)
+        self.delta_vel[0] = (self.Kp_delta[0] * (target_delta[0] - self.delta[0]) + self.Ki_delta[0] * (self.integrand_delta[0]) +
+			     self.Kd_delta[0] * ((target_delta[0] - self.delta[0]) - (self.old_target_delta[0] - self.old_delta[0])) / dt)
+        self.delta_vel[1] = (self.Kp_delta[1] * (target_delta[1] - self.delta[1]) + self.Ki_delta[1] * (self.integrand_delta[1]) +
+			     self.Kd_delta[1] * ((target_delta[1] - self.delta[1]) - (self.old_target_delta[1] - self.old_delta[1])) / dt)
 
         # and socke.vel[1] < 0:
         if abs(self.pos[1] - target_pos[1]) < 100 and not (abs(socke.vel[1]) < 0.01):
@@ -88,12 +80,8 @@ class Camera():
         self.delta[0] = self.delta[0] + self.delta_vel[0] * dt
         self.delta[1] = self.delta[1] + self.delta_vel[1] * dt
 
-        #self.pos[0] = socke.pos[0]
-        #self.pos[1] = socke.pos[1]
-
 
 class World():
-
     def __init__(self, stars, enemies, platforms):
         self.stars = stars
         self.enemies = enemies
@@ -131,11 +119,9 @@ class Enemy():
 
     def draw(self):
         if(self.visible):
-            pygame.draw.rect(DISPLAYSURF, GREEN, (int(round(self.pos[
-                             0] + shift[0])), int(round(self.pos[1] + shift[1])), self.enemysize, self.enemysize))
+            pygame.draw.rect(DISPLAYSURF, GREEN, (int(round(self.pos[0] + shift[0])), int(round(self.pos[1] + shift[1])), self.enemysize, self.enemysize))
 
     def update(self, dt):
-
         if self.state == 1:
             self.pos[0] = self.pos[0] + 0.05 * dt
         else:
@@ -156,8 +142,7 @@ class Star():
 
     def draw(self):
         if(self.visible):
-            pygame.draw.circle(DISPLAYSURF, BLUE, (int(
-                round(self.pos[0] + shift[0])), int(round(self.pos[1] + shift[1]))), 8, 0)
+            pygame.draw.circle(DISPLAYSURF, BLUE, (int(round(self.pos[0] + shift[0])), int(round(self.pos[1] + shift[1]))), 8, 0)
 
 
 class Platform():
@@ -169,8 +154,7 @@ class Platform():
         self.width = width
 
     def draw(self):
-        pygame.draw.rect(DISPLAYSURF, RED, (int(round(self.anchor[
-                         0] + shift[0])), int(round(self.anchor[1] + shift[1])), self.length, self.width))
+        pygame.draw.rect(DISPLAYSURF, RED, (int(round(self.anchor[0] + shift[0])), int(round(self.anchor[1] + shift[1])), self.length, self.width))
 
     def update(self, dt):
         self.anchor = (self.anchor[0] + dt * self.vel[0],
@@ -178,7 +162,6 @@ class Platform():
 
 
 class Bounce(Platform):
-
     def __init__(self, anchor, length, width, jumpvel, standvel):
         self.anchor = anchor
         self.length = length
@@ -188,7 +171,6 @@ class Bounce(Platform):
 
 
 class MovePlat(Platform):
-
     time_counter = 0
 
     def __init__(self, anchor, length, width, switchtime):
@@ -207,7 +189,6 @@ class MovePlat(Platform):
 
 
 class AnimatedSprite():
-
     def __init__(self, delay, images):
         # delay in ms
         self.images = images
@@ -237,7 +218,7 @@ class Background():
             DISPLAYSURF.blit(i[0], (i[1] * shift[0] % 900 + 900, shift[1]))
 
             if counter == 1:
-                 # if (shift[1] < -500):
+                # if (shift[1] < -500):
                 DISPLAYSURF.blit(i[0], (i[1] * shift[0] %
                                         900 - 900, shift[1] - 600))
                 DISPLAYSURF.blit(i[0], (i[1] * shift[0] % 900, shift[1] - 600))
@@ -248,16 +229,12 @@ class Background():
 
 
 class Sock():
-    sprite_walk_right = AnimatedSprite(
-        50, [pygame.image.load("laufanimation/%02d.png" % i) for i in range(13)])
-    sprite_walk_left = AnimatedSprite(50, [pygame.transform.flip(pygame.image.load(
-        "laufanimation/%02d.png" % i), True, False) for i in range(13)])
+    sprite_walk_right = AnimatedSprite(50, [pygame.image.load("laufanimation/%02d.png" % i) for i in range(13)])
+    sprite_walk_left = AnimatedSprite(50, [pygame.transform.flip(pygame.image.load("laufanimation/%02d.png" % i), True, False) for i in range(13)])
     sprite_still = AnimatedSprite(50, [pygame.image.load("still.png")])
-    sprite_still_left = AnimatedSprite(
-        50, [pygame.transform.flip(pygame.image.load("still.png"), True, False)])
+    sprite_still_left = AnimatedSprite(50, [pygame.transform.flip(pygame.image.load("still.png"), True, False)])
     sprite_jump_right = AnimatedSprite(50, [pygame.image.load("jump.png")])
-    sprite_jump_left = AnimatedSprite(
-        50, [pygame.transform.flip(pygame.image.load("jump.png"), True, False)])
+    sprite_jump_left = AnimatedSprite(50, [pygame.transform.flip(pygame.image.load("jump.png"), True, False)])
 
     JUMPING_VELOCITY = 1.1  # 1.2
     RUNNING_VELOCITY = 0.6
@@ -281,7 +258,6 @@ class Sock():
         self.old_pos = list(pos)
         self.state = state
         self.vel = [0, 0]
-
         self.last_standed_platform = None
 
     def draw(self):
@@ -320,7 +296,6 @@ class Sock():
         return self.vel[0] == self.basevel()[0]
 
     def update(self, dt):
-
         self.old_pos = list(self.pos)
 
         if not self.onboard():  # socke.pos[1] <= 250:
@@ -370,9 +345,7 @@ class Sock():
                 self.pos[0] = self.pos[0] + 90
 
     def start_jump(self, userjump):
-
         if userjump:  # this realizes whether I induced a jump actively or not
-
             if self.lastbounceplatform and CURRENT_TIME - self.timestamp_lastbounceplatform < self.LASTBOUNCE_TOL:
                 self.vel[1] = -self.JUMPING_VELOCITY - \
                     self.lastbounceplatform.jumpvel
@@ -402,8 +375,7 @@ class Sock():
         self.state = 'still'
         self.vel[0] = self.basevel()[0]
 
-    # Steht Socke momentan auf einer Plattform? (Minimales überstehen ist
-    # okay.)
+    # Steht Socke momentan auf einer Plattform? (Minimales überstehen ist okay.)
     def onboard(self):
         for p in world:
             if self.pos[0] + self.standing_factor * self.length >= p.anchor[0] and self.pos[0] + self.length - self.standing_factor * self.length <= p.anchor[0] + p.length:
@@ -521,40 +493,16 @@ while True:  # main game loop
             if event.type == pygame.KEYUP:
                 socke = Sock((10.0, 250.0), 'still')
                 camera = Camera(list((socke.pos[0], socke.pos[1])), (0, 0))
-                # for s in stars:
-                #s.visible = True
-                # for e in enemies:
-                #e.visible = True
                 w1.set_init()
                 clock.tick(FPS)
                 back1.draw(socke)
     else:
         clock.tick(FPS)
         dt = float(clock.get_time())
-        # DISPLAYSURF.fill(WHITE)
 
-        #shift = list((-socke.pos[0]+200,-socke.pos[1]+250))
-
-        #shift = [200 - camera.pos[0], 250 - camera.pos[1]]
-        # ohne PID-Regelung: shift = [200 - socke.pos[0], 250 - socke.pos[1]]
-        # for p in world:
-        # p.draw()
-
-        # for s in stars:
-        # s.draw()
-
-        # for e in enemies:
-        # e.draw()
-
-        #dt = float(clock.get_time())
-        # print dt
         number_of_nano_steps = 10
         for i in range(number_of_nano_steps):
             socke.update(dt / number_of_nano_steps)
-            # for p in world:
-            # p.update(dt/number_of_nano_steps)
-            # for e in enemies:
-            # e.update(dt/number_of_nano_steps)
             w1.update_world(dt / number_of_nano_steps)
             camera.update(dt / number_of_nano_steps, socke)
 
@@ -589,4 +537,5 @@ while True:  # main game loop
             if event.type == pygame.KEYUP:
                 if (event.key == K_RIGHT and not pressed[K_LEFT]) or (event.key == K_LEFT and not pressed[K_RIGHT]):
                     socke.stop()
+
         pygame.display.update()
